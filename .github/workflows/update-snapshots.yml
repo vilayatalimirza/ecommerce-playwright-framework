@@ -1,0 +1,55 @@
+name: Update Visual Snapshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_path:
+        description: 'Test file to update snapshots for'
+        required: true
+        default: 'tests/visual-a11y.spec.ts'
+
+permissions:
+  contents: write
+
+jobs:
+  update-snapshots:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium with Linux dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate baseline snapshots on Linux
+        run: npx playwright test ${{ inputs.test_path }} --update-snapshots --project=chromium
+        env:
+          CI: true
+
+      - name: Commit and push Linux snapshots
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage all generated snapshot directories
+          git add "**/*-snapshots/*"
+
+          # Commit only if changes were detected
+          if git diff --staged --quiet; then
+            echo "No snapshot changes to commit."
+          else
+            git commit -m "chore(visual): update linux visual snapshots [skip ci]"
+            git push origin ${{ github.ref_name }}
+          fi
