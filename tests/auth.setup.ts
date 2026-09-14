@@ -1,7 +1,7 @@
 import { test as setup, expect } from '@playwright/test';
 import userData from '../data/users.json';
 
-const authFile = 'playwright/.auth/user.json';
+const authFile = 'playwright/.auth/user.json';  
 setup('authenticate', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Email:').fill(userData.validUser.email);
