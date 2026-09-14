@@ -8,3 +8,5 @@ node_modules/
 /playwright/.auth/
 .env
 
+# Allow Playwright snapshot baseline images
+!tests/**/*-snapshots/*.png
