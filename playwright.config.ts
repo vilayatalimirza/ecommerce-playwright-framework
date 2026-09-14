@@ -13,15 +13,25 @@ export default defineConfig({
  reporter: 'html',
 
   use: {
-    baseURL: process.env.BASE_URL,
+    baseURL: process.env.BASE_URL|| 'https://demowebshop.tricentis.com',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
   /* Configure projects for major browsers */
   projects: [
     {
+      name: 'setup',
+      testMatch: /\.setup\.ts$/,
+    },
+
+    // Browser project configured to consume the authenticated storage state
+    {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
     {
        name: 'Mobile Safari',

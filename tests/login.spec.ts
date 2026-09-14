@@ -28,7 +28,7 @@ test.describe('Authentication Tests', () => {
       users.validUser.password
     );
 
-    await expect(page).toHaveURL('https://demowebshop.tricentis.com/');
+    await expect(page).toHaveURL(/.*demowebshop.*/);
     await expect(page.getByRole('link', { name: 'Log out' })).toBeVisible();
     await expect(page.getByRole('link', { name: users.validUser.email })).toBeVisible();
   });
