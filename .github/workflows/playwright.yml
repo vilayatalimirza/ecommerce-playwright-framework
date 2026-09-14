@@ -30,9 +30,6 @@ jobs:
     - name: Install OS Dependencies Only
       if: steps.playwright-cache.outputs.cache-hit == 'true'
       run: npx playwright install-deps chromium
-
-    - name: Run Playwright tests
-      run: npx playwright test
     - name: Run Playwright tests
       run: npx playwright test
     - uses: actions/upload-artifact@v4
