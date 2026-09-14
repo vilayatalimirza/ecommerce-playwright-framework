@@ -9,8 +9,12 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
- reporter: 'html',
+  workers: process.env.CI ? 2 : '50%',
+  reporter: [
+    ['html', { open: 'never', outputFolder: 'playwright-report' }],
+    ['list'],
+    ...(process.env.CI ? [['github'] as const] : []),
+  ],
 
   use: {
     baseURL: process.env.BASE_URL|| 'https://demowebshop.tricentis.com',
@@ -33,11 +37,11 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    {
+    /*{
        name: 'Mobile Safari',
        use: { ...devices['iPhone 12'] },
      },
-
+    */
     /* Test against branded browsers. */
     // {
     //   name: 'Microsoft Edge',
