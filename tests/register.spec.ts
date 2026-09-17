@@ -1,5 +1,4 @@
-import { test } from '../fixtures/BaseTest';
-import { expect } from '@playwright/test';
+import { test, expect } from '../fixtures/BaseTest';
 import { DataFactory } from '../utils/DataFactory';
 
 test.describe('Customer Registration Flow', () => {

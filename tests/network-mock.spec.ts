@@ -1,8 +1,8 @@
-import { expect, test } from '@playwright/test';
+import { test, expect } from '../fixtures/BaseTest';
 
 test.describe('Network Mocking', () => {
-    test('Mocks search autocomplete suggestions', async ({ page }) => {
-    await page.route('**/catalog/searchtermautocomplete*', async (route) => {
+  test('Mocks search autocomplete suggestions', async ({ page }) => {
+    await page.route('**/catalog/searchtermautocomplete*', async route => {
       const mockedSuggestions = [
         {
           label: 'Custom Enterprise QA Laptop',
@@ -16,15 +16,15 @@ test.describe('Network Mocking', () => {
       });
     });
     await page.goto('/');
-    const searchInput = page.locator('#small-searchterms');        
+    const searchInput = page.locator('#small-searchterms');
     await searchInput.fill('comp');
     const autocompleteDropdown = page.locator('.ui-autocomplete');
     await expect(autocompleteDropdown).toBeVisible();
     await expect(autocompleteDropdown.getByText('Custom Enterprise QA Laptop')).toBeVisible();
-    });
+  });
 
-    test('Handles server failure on add-to-cart', async ({ page }) => {
-    await page.route('**/addproducttocart/**', async (route) => {
+  test('Handles server failure on add-to-cart', async ({ page }) => {
+    await page.route('**/addproducttocart/**', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

@@ -1,6 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { test, expect } from '../fixtures/BaseTest';
 
 const searchTerms = ['Laptop', 'Computer', 'Phone'];
+
 test.describe('Parameterized Catalog Searches', () => {
   test.describe.configure({ mode: 'parallel' });
   for (const term of searchTerms) {

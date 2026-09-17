@@ -1,5 +1,4 @@
-// tests/cart-api.spec.ts
-import { expect, test } from '@playwright/test';
+import { test, expect } from '../fixtures/BaseTest';
 
 test.describe('Shopping Cart API', () => {
   test('adds 14.1-inch Laptop to cart directly via POST request', async ({ request }) => {
@@ -9,6 +8,7 @@ test.describe('Shopping Cart API', () => {
     expect(responseBody.success).toBe(true);
     expect(responseBody.message).toContain('The product has been added to your');
   });
+
   test('seeds cart via API and verifies via UI', async ({ page }) => {
     const response = await page.request.post('/addproducttocart/catalog/31/1/1');
     expect(response.ok()).toBeTruthy();

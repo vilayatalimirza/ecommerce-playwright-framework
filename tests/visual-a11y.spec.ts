@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { test, expect } from '../fixtures/BaseTest';
 import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Visual Regression & Accessibility Audits', () => {
@@ -9,8 +9,10 @@ test.describe('Visual Regression & Accessibility Audits', () => {
 
   test('Validates login page accessibility against WCAG 2A/2AA', async ({ page }) => {
     await page.goto('/login');
-    const accessibilityScanResults = await new AxeBuilder({ page }).include('.customer-blocks').withTags(['wcag2a', 'wcag2aa'])
-      .analyze();    
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .include('.customer-blocks')
+      .withTags(['wcag2a', 'wcag2aa'])
+      .analyze();
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 });
