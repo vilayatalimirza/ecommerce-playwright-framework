@@ -1,11 +1,54 @@
 import { test, expect } from '../fixtures/BaseTest';
-import userData from '../data/users.json';
 
-test.describe('Customer Account Management', () => {
-  test('loads customer profile using authenticated storage state', async ({ page }) => {
+/**
+ * Runs authenticated using default storageState.
+ */
+test.describe('Customer Profile & Session Lifecycle', () => {
+  /**
+   * MUTATION-SAFETY: Reads the current FirstName, updates it with a test suffix,
+   * asserts the updated value persists, and then restores the original value
+   * to keep the shared account clean.
+   */
+  test('Customer can update first name and restore original state @smoke @regression', async ({
+    page,
+  }) => {
     await page.goto('/customer/info');
-    await expect(page).toHaveURL('/customer/info');
-    await expect(page.getByRole('heading', { name: /customer info/i })).toBeVisible();
-    await expect(page.getByLabel('Email:')).toHaveValue(userData.validUser.email);
+    const firstNameInput = page.getByLabel('First name:');
+    const saveButton = page.getByRole('button', { name: 'Save' });
+
+    await expect(firstNameInput).toBeVisible();
+    const originalFirstName = await firstNameInput.inputValue();
+    const temporaryFirstName = `${originalFirstName}Mod`;
+
+    // 1. Mutate state
+    await firstNameInput.fill(temporaryFirstName);
+    await saveButton.click();
+
+    // 2. Reload and assert mutated state
+    await page.goto('/customer/info');
+    await expect(firstNameInput).toHaveValue(temporaryFirstName);
+
+    // 3. Restore original state
+    await firstNameInput.fill(originalFirstName);
+    await saveButton.click();
+
+    // 4. Assert restored state
+    await page.goto('/customer/info');
+    await expect(firstNameInput).toHaveValue(originalFirstName);
+  });
+
+  test('Customer can log out to terminate authenticated session @smoke @regression', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const logoutLink = page.getByRole('link', { name: 'Log out' });
+    await expect(logoutLink).toBeVisible();
+
+    await logoutLink.click();
+
+    // Verify session termination on current context
+    await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Register' })).toBeVisible();
+    await expect(logoutLink).toBeHidden();
   });
 });

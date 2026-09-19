@@ -6,13 +6,19 @@ export class LoginPage {
   readonly passwordInput: Locator;
   readonly loginButton: Locator;
   readonly errorMessage: Locator;
+  readonly rememberMeCheckbox: Locator;
+  readonly forgotPasswordLink: Locator;
+  readonly emailValidationError: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.emailInput = page.getByLabel('Email:');
     this.passwordInput = page.getByLabel('Password:', { exact: true });
     this.loginButton = page.getByRole('button', { name: 'Log in' });
-    this.errorMessage = page.locator('.message-error');
+    this.errorMessage = page.locator('.validation-summary-errors');
+    this.rememberMeCheckbox = page.getByLabel('Remember me?');
+    this.forgotPasswordLink = page.getByRole('link', { name: 'Forgot password?' });
+    this.emailValidationError = page.locator('[data-valmsg-for="Email"], .field-validation-error');
   }
 
   async navigate(): Promise<void> {

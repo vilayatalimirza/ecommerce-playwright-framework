@@ -1,3 +1,4 @@
+// pages/RegisterPage.ts
 import { type Locator, type Page } from '@playwright/test';
 import { type UserData } from '../utils/DataFactory';
 
@@ -12,6 +13,14 @@ export class RegisterPage {
   readonly confirmPasswordInput: Locator;
   readonly registerButton: Locator;
   readonly resultMessage: Locator;
+  readonly errorMessage: Locator;
+
+  // Field validation message locators
+  readonly firstNameError: Locator;
+  readonly lastNameError: Locator;
+  readonly emailError: Locator;
+  readonly passwordError: Locator;
+  readonly confirmPasswordError: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -24,6 +33,14 @@ export class RegisterPage {
     this.confirmPasswordInput = page.getByLabel('Confirm password:');
     this.registerButton = page.getByRole('button', { name: 'Register' });
     this.resultMessage = page.locator('.result');
+    this.errorMessage = page.locator('.validation-summary-errors');
+
+    // Scoped field validations
+    this.firstNameError = page.locator('[data-valmsg-for="FirstName"]');
+    this.lastNameError = page.locator('[data-valmsg-for="LastName"]');
+    this.emailError = page.locator('[data-valmsg-for="Email"]');
+    this.passwordError = page.locator('[data-valmsg-for="Password"]');
+    this.confirmPasswordError = page.locator('[data-valmsg-for="ConfirmPassword"]');
   }
 
   async navigate(): Promise<void> {
