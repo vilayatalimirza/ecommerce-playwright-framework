@@ -1,4 +1,3 @@
-// tests/registration-validation.spec.ts
 import { test, expect } from '../fixtures/BaseTest';
 import users from '../data/users.json';
 import { uniqueEmail } from '../utils/test-data';
@@ -34,9 +33,6 @@ test.describe('Registration Form Validation', () => {
     await expect(registerPage.confirmPasswordError).toContainText(/do not match|does not match/i);
   });
 
-  /**
-   * Assumes default nopCommerce minimum password length of 6 characters.
-   */
   test('Registration displays error when password is under 6 characters @regression', async ({
     registerPage,
   }) => {
