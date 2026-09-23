@@ -88,11 +88,11 @@ jobs:
           retention-days: 30
 
       - name: Create Issue on Test Failure
-        if: failure()
+        if: ${{ always() && needs.test.result == 'failure' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh issue create \
-            --title "🚨 Playwright Test Run Failed" \
-            --body "The automated tests failed on shard(s). Review the unified HTML report here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --label "bug, automated-issue"
+           --title "🚨 Playwright Test Run Failed" \
+           --body "The automated tests failed on shard(s). Review the unified HTML report here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+           --label "bug" 
