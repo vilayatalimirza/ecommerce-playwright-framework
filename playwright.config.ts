@@ -1,35 +1,56 @@
 import { defineConfig, devices } from '@playwright/test';
+import 'dotenv/config';
+
+const isCI = process.env.CI === 'true';
 
 export default defineConfig({
   testDir: './tests',
-  /* 1. Run tests sequentially per file to avoid thread collisions on the demo store */
+
+  // Run tests sequentially within a file to reduce state collisions
+  // against the shared demo store.
   fullyParallel: false,
 
-  /* 2. Cap workers to 2 (or 1 during local troubleshooting) */
-  workers: 2,
+  // Use 2 workers locally.
+  // Can be overridden with PLAYWRIGHT_WORKERS when troubleshooting.
+  workers: process.env.PLAYWRIGHT_WORKERS ? Number(process.env.PLAYWRIGHT_WORKERS) : 2,
 
-  /* 3. Increase test timeout to 60s for multi-step checkout/account flows */
+  // Retry failed tests once in CI.
+  retries: isCI ? 1 : 0,
+
   timeout: 60_000,
 
-  /* 4. Increase assertion timeout to 10s for slow AJAX updates */
   expect: {
     timeout: 40_000,
   },
 
   use: {
-    baseURL: 'https://demowebshop.tricentis.com',
+    baseURL: process.env.BASE_URL ?? 'https://demowebshop.tricentis.com',
+
+    // Use the generated authenticated session by default.
+    storageState: 'playwright/.auth/user.json',
+
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    /* 5. Wait for DOM content rather than full networkidle to avoid hanging */
+
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
   },
 
   projects: [
+    // Generate authentication state before the main test project.
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
+
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+
+      use: {
+        ...devices['Desktop Chrome'],
+      },
     },
   ],
 });
