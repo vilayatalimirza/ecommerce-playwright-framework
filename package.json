@@ -4,7 +4,19 @@
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,json,md,mjs}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep \"@smoke\" --workers=2",
+    "test:sanity": "playwright test --grep \"@sanity\" --workers=2",
+    "test:tier1": "playwright test tests/search.spec.ts tests/search-parallel.spec.ts tests/global-utilities.spec.ts tests/visual-a11y.spec.ts tests/network-mock.spec.ts --workers=2",
+    "test:tier2": "playwright test tests/register.spec.ts tests/registration-validation.spec.ts tests/login.spec.ts tests/auth-validation.spec.ts --workers=2",
+    "test:tier3": "playwright test tests/catalog.spec.ts tests/configurable-products.spec.ts tests/gift-cards.spec.ts --workers=2",
+    "test:tier4": "playwright test tests/wishlist.spec.ts tests/compare-products.spec.ts --workers=2",
+    "test:tier5": "playwright test tests/shopping-cart.spec.ts tests/cart-race-conditions.spec.ts tests/cart-api.spec.ts --workers=2",
+    "test:tier6": "playwright test tests/checkout-validation.spec.ts tests/checkout-order.spec.ts tests/guest-checkout.spec.ts --workers=2",
+    "test:tier7": "playwright test tests/order-management.spec.ts tests/account-management.spec.ts tests/authenticated-account.spec.ts tests/customer-info.spec.ts --workers=2",
+    "test:all": "playwright test --workers=2",
+    "test:regression": "npm run test:tier1 && npm run test:tier2 && npm run test:tier3 && npm run test:tier4 && npm run test:tier5 && npm run test:tier6 && npm run test:tier7"
   },
   "lint-staged": {
     "*.ts": [

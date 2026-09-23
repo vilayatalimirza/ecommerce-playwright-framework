@@ -2,6 +2,8 @@ import { test, expect } from '../fixtures/BaseTest';
 import { type CustomerAddress } from '../pages/CustomerAccountPage';
 import { DataFactory } from '../utils/DataFactory';
 
+test.use({ storageState: 'playwright/.auth/user.json' });
+
 test.describe('Authenticated Customer Account Management', () => {
   test('adds a new address to the customer address book', async ({ customerAccountPage }) => {
     const user = DataFactory.generateUserData();
@@ -27,6 +29,6 @@ test.describe('Authenticated Customer Account Management', () => {
   test('verifies order history page renders correctly', async ({ page, customerAccountPage }) => {
     await customerAccountPage.gotoOrders();
     await expect(page.getByRole('heading', { name: 'My account - Orders' })).toBeVisible();
-    await expect(customerAccountPage.ordersContainer.or(page.getByText('No orders'))).toBeVisible();
+    await expect(customerAccountPage.ordersContainer).toBeVisible();
   });
 });

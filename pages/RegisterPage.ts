@@ -1,5 +1,5 @@
 // pages/RegisterPage.ts
-import { type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { type UserData } from '../utils/DataFactory';
 
 export class RegisterPage {
@@ -47,6 +47,7 @@ export class RegisterPage {
     await this.page.goto('/register');
   }
 
+  // pages/RegisterPage.ts
   async registerUser(user: UserData): Promise<void> {
     if (user.gender === 'Male') {
       await this.maleRadio.check();
@@ -60,5 +61,8 @@ export class RegisterPage {
     await this.passwordInput.fill(user.password);
     await this.confirmPasswordInput.fill(user.password);
     await this.registerButton.click();
+
+    // Guarantee the registration transaction finished and session cookie is set
+    await expect(this.resultMessage).toContainText(/Your registration completed/i);
   }
 }

@@ -1,5 +1,7 @@
 import { test, expect } from '../fixtures/BaseTest';
 
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Shopping Cart API', () => {
   test('adds 14.1-inch Laptop to cart directly via POST request', async ({ request }) => {
     const response = await request.post('/addproducttocart/catalog/31/1/1');

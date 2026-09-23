@@ -3,6 +3,8 @@ import { test, expect } from '../fixtures/BaseTest';
 /**
  * Runs authenticated using default storageState.
  */
+test.use({ storageState: 'playwright/.auth/user.json' });
+
 test.describe('Customer Profile & Session Lifecycle', () => {
   /**
    * MUTATION-SAFETY: Reads the current FirstName, updates it with a test suffix,
@@ -13,7 +15,7 @@ test.describe('Customer Profile & Session Lifecycle', () => {
     page,
   }) => {
     await page.goto('/customer/info');
-    const firstNameInput = page.getByLabel('First name:');
+    const firstNameInput = page.locator('#FirstName, input[name*="FirstName"]');
     const saveButton = page.getByRole('button', { name: 'Save' });
 
     await expect(firstNameInput).toBeVisible();

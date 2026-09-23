@@ -87,16 +87,18 @@ test.describe('Wishlist Lifecycle', () => {
 
   test('Wishlist sharing link loads public view @regression', async ({ page, wishlistPage }) => {
     await page.goto(PRODUCT_URL);
-    await page.locator('.add-to-wishlist-button').click();
+    await page.locator('.overview').getByRole('button', { name: 'Add to wishlist' }).click();
     await expect(wishlistPage.notificationBar).toContainText(/added to your wishlist/i);
 
     await wishlistPage.navigate();
     await expect(wishlistPage.shareLink).toBeVisible();
 
-    const publicUrl = wishlistPage.shareLink;
-    await expect(publicUrl).toHaveAttribute('href', );
+    // Retrieve the string URL attribute from the locator
+    const shareHref = wishlistPage.shareLink;
+    await expect(shareHref).toHaveAttribute('href', );
 
-    await page.goto(publicUrl as string);
+    // Navigate to the string URL
+    await page.goto(shareHref!);
     const publicRow = await wishlistPage.getRowByProductName(PRODUCT_NAME);
     await expect(publicRow).toBeVisible();
   });

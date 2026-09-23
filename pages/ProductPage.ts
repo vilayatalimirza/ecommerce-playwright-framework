@@ -1,5 +1,5 @@
 // pages/ProductPage.ts
-import { type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 
 export interface GiftCardDetails {
   recipientName?: string;
@@ -89,6 +89,8 @@ export class ProductPage {
       await this.setQuantity(quantity);
     }
     await this.addToCartButton.click();
+    // Synchronize with server AJAX response before resolving
+    await expect(this.notificationBar).toContainText(/added to your shopping cart/i);
   }
 
   async getPriceValue(): Promise<number> {
@@ -98,7 +100,6 @@ export class ProductPage {
   }
 
   async selectAttributeOption(textOrPattern: string | RegExp): Promise<void> {
-    // 1. Resolve dropdown options inside <select>
     const selectOption = this.page.locator('select option', { hasText: textOrPattern }).first();
     if ((await selectOption.count()) > 0) {
       const val = await selectOption.getAttribute('value');
@@ -107,14 +108,12 @@ export class ProductPage {
       return;
     }
 
-    // 2. Resolve radio/checkbox labels
     const label = this.page.locator('label', { hasText: textOrPattern }).first();
     if ((await label.count()) > 0) {
       await label.click();
       return;
     }
 
-    // 3. Fallback
     const option = this.page.getByLabel(textOrPattern).first();
     await option.check();
   }
