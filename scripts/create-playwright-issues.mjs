@@ -54,14 +54,25 @@ function runGh(args) {
   }).trim();
 }
 
-function truncate(value, maxLength = 5000) {
+function stripAnsi(value) {
   if (!value) {
     return '';
   }
+  // eslint-disable-next-line no-control-regex
+  const ansiEscape = /\x1b\[[0-9;]*[A-Za-z]/g;
+  return String(value).replace(ansiEscape, '');
+}
 
-  return value.length > maxLength
-    ? `${value.slice(0, maxLength)}\n...[truncated]`
-    : value;
+function truncate(value, maxLength = 5000) {
+  const cleanValue = stripAnsi(value);
+
+  if (!cleanValue) {
+    return '';
+  }
+
+  return cleanValue.length > maxLength
+    ? `${cleanValue.slice(0, maxLength)}\n...[truncated]`
+    : cleanValue;
 }
 
 function formatOutput(value) {
@@ -111,7 +122,7 @@ function createFailureFromTest(
   }
 
   return {
-    title: spec.title,
+    title: spec.title.replace(/\[@[^\]]+\]\s*$/, '').trimEnd(),
     suite: suiteTitles.join(' › '),
     titlePath: [...suiteTitles, spec.title],
     file,
@@ -219,14 +230,18 @@ function getSourceUrl(failure) {
   }
 
   const cleanFile = failure.file
-    .replaceAll('\\', '/')
-    .replace(/^\.\//, '');
+  .replaceAll('\\', '/')
+  .replace(/^\.\//, '');
+
+  const repositoryFile = cleanFile.startsWith('tests/')
+    ? cleanFile
+    : `tests/${cleanFile}`;
 
   const lineAnchor = failure.line
     ? `#L${failure.line}`
     : '';
 
-  return `${serverUrl}/${repository}/blob/${commitSha}/${cleanFile}${lineAnchor}`;
+  return `${serverUrl}/${repository}/blob/${commitSha}/${repositoryFile}${lineAnchor}`;
 }
 
 function getReproductionCommand(failure) {
