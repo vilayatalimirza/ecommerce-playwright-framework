@@ -52,6 +52,12 @@ export default defineConfig({
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
+      use: {
+        storageState: {
+          cookies: [],
+          origins: [],
+        },
+      },
     },
 
     {

@@ -621,11 +621,26 @@ function printDryRunFailure(
 }
 
 async function main() {
-  const failures =
+  const allFailures =
     await loadJsonReports();
 
+  // Multiple CI shards can report the same test failure.
+  // Deduplicate them before creating/updating GitHub issues.
+  const failures = [
+    ...new Map(
+      allFailures.map((failure) => [
+        createFingerprint(failure),
+        failure,
+      ]),
+    ).values(),
+  ];
+
   console.log(
-    `Found ${failures.length} persistent Playwright failure(s).`,
+    `Found ${allFailures.length} failure report entries.`,
+  );
+
+  console.log(
+    `Found ${failures.length} unique persistent Playwright failure(s).`,
   );
 
   for (const failure of failures) {
