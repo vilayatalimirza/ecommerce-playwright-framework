@@ -1,5 +1,7 @@
 import { faker } from '@faker-js/faker';
+import { randomUUID } from 'node:crypto';
 import process from 'node:process';
+
 import { type BillingAddress } from '../pages/CheckoutPage';
 
 if (process.env.FAKER_SEED) {
@@ -20,9 +22,10 @@ export class DataFactory {
       gender: faker.helpers.arrayElement(['Male', 'Female']),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
-      email: faker.internet.email({ provider: 'example.com' }).toLowerCase(),
+      email: uniqueEmail('qa'),
       password: `P@ss${faker.string.alphanumeric({ length: 8 })}!`,
     };
+
     return { ...defaultUser, ...overrides };
   }
 
@@ -37,14 +40,13 @@ export class DataFactory {
       postalCode: faker.location.zipCode('#####'),
       phoneNumber: faker.phone.number({ style: 'national' }),
     };
+
     return { ...defaultAddress, ...overrides };
   }
 }
 
 export function uniqueId(prefix = 'qa'): string {
-  const timestamp = Date.now();
-  const randomSuffix = faker.string.alphanumeric({ length: 5, casing: 'lower' });
-  return `${prefix}-${timestamp}-${randomSuffix}`;
+  return `${prefix}-${Date.now()}-${randomUUID()}`;
 }
 
 export function uniqueEmail(prefix = 'qa'): string {

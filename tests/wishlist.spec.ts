@@ -61,7 +61,6 @@ test.describe('Wishlist Lifecycle', () => {
     await wishlistPage.navigate();
     const row = await wishlistPage.getRowByProductName(PRODUCT_NAME);
     await wishlistPage.removeRow(row);
-
     await expect(row).not.toBeAttached();
     await expect(wishlistPage.emptyWishlistMessage).toContainText(/wishlist is empty/i);
   });
@@ -92,13 +91,10 @@ test.describe('Wishlist Lifecycle', () => {
 
     await wishlistPage.navigate();
     await expect(wishlistPage.shareLink).toBeVisible();
+    await expect(wishlistPage.shareLink).toHaveAttribute('href', /.+/);
 
-    // Retrieve the string URL attribute from the locator
-    const shareHref = wishlistPage.shareLink;
-    await expect(shareHref).toHaveAttribute('href', );
-
-    // Navigate to the string URL
-    await page.goto(shareHref!);
+    const shareHref = await wishlistPage.shareLink.getAttribute('href');
+    await page.goto(shareHref as string);
     const publicRow = await wishlistPage.getRowByProductName(PRODUCT_NAME);
     await expect(publicRow).toBeVisible();
   });

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,json,md,mjs}\"",
     "prepare": "husky",
     "test": "playwright test",
