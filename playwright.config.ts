@@ -23,6 +23,16 @@ export default defineConfig({
     timeout: 40_000,
   },
 
+  reporter: [
+    ['blob', { outputDir: 'blob-report' }],
+    [
+      'json',
+      {
+        outputFile: process.env.PLAYWRIGHT_JSON_OUTPUT_FILE ?? 'playwright-json/results.json',
+      },
+    ],
+  ],
+
   use: {
     baseURL: process.env.BASE_URL ?? 'https://demowebshop.tricentis.com',
 

@@ -17,7 +17,8 @@
     "test:tier6": "playwright test tests/checkout-validation.spec.ts tests/checkout-order.spec.ts tests/guest-checkout.spec.ts --workers=2",
     "test:tier7": "playwright test tests/order-management.spec.ts tests/account-management.spec.ts tests/authenticated-account.spec.ts tests/customer-info.spec.ts --workers=2",
     "test:all": "playwright test --workers=2",
-    "test:regression": "npm run test:tier1 && npm run test:tier2 && npm run test:tier3 && npm run test:tier4 && npm run test:tier5 && npm run test:tier6 && npm run test:tier7"
+    "test:regression": "npm run test:tier1 && npm run test:tier2 && npm run test:tier3 && npm run test:tier4 && npm run test:tier5 && npm run test:tier6 && npm run test:tier7",
+    "report:issues": "node scripts/create-playwright-issues.mjs"
   },
   "lint-staged": {
     "*.ts": [

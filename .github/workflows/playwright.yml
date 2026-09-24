@@ -2,15 +2,51 @@ name: Distributed Playwright CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+env:
+  BASE_URL: https://demowebshop.tricentis.com
+  FAKER_SEED: 12345
 
 jobs:
+  # ------------------------------------------------------------
+  # 1. Code quality and TypeScript validation
+  # ------------------------------------------------------------
+  quality:
+    name: Code Quality & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript type check
+        run: npm run typecheck
+
+  # ------------------------------------------------------------
+  # 2. Distributed Playwright execution
+  # ------------------------------------------------------------
   test:
     name: Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    needs: [quality]
+
     strategy:
       fail-fast: false
       matrix:
@@ -25,7 +61,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'npm'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -34,12 +70,14 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests on shard
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: playwright-json/results-${{ matrix.shardIndex }}.json
         run: >
           npx playwright test
           --project=chromium
           --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-          --reporter=blob
 
+      # Upload Blob results even when tests fail.
       - name: Upload blob report artifact
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -48,13 +86,32 @@ jobs:
           path: blob-report/
           retention-days: 1
 
+      # Upload machine-readable JSON results for bug generation.
+      - name: Upload JSON test report artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: json-report-${{ matrix.shardIndex }}
+          path: playwright-json/
+          retention-days: 1
+
+  # ------------------------------------------------------------
+  # 3. Merge reports and create/update bugs
+  # ------------------------------------------------------------
   merge-reports:
-    name: Merge Distributed Reports
+    name: Merge Reports & Create Bugs
     runs-on: ubuntu-latest
-    needs: [test]
-    if: ${{ !cancelled() }}
+    needs: [quality, test]
+
+    # Run even when Playwright tests fail, so failure reports
+    # and automatic bug creation still happen.
+    if: >
+      ${{ always() &&
+          needs.quality.result == 'success' &&
+          needs.test.result != 'cancelled' }}
+
     permissions:
-      issues: write # Required to allow GitHub CLI to create issues
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -64,11 +121,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: 'npm'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      # ----------------------------------------------------------
+      # Download Blob reports
+      # ----------------------------------------------------------
       - name: Download all shard blob reports
         uses: actions/download-artifact@v4
         with:
@@ -76,23 +136,69 @@ jobs:
           pattern: blob-report-*
           merge-multiple: true
 
-      - name: Merge blobs into HTML report
-        # If the underlying tests failed, this command will exit with an error code, triggering failure() below
-        run: npx playwright merge-reports --reporter=html ./all-blob-reports
+      # ----------------------------------------------------------
+      # Download JSON reports
+      # ----------------------------------------------------------
+      - name: Download all shard JSON reports
+        uses: actions/download-artifact@v4
+        with:
+          path: playwright-json
+          pattern: json-report-*
+          merge-multiple: true
 
+      # ----------------------------------------------------------
+      # Merge Blob reports into unified HTML report
+      # ----------------------------------------------------------
+      - name: Merge blobs into HTML report
+        run: >
+          npx playwright merge-reports
+          --reporter=html
+          ./all-blob-reports
+
+      # ----------------------------------------------------------
+      # Upload unified HTML report
+      # ----------------------------------------------------------
       - name: Upload unified HTML report
         uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
 
-      - name: Create Issue on Test Failure
-        if: ${{ always() && needs.test.result == 'failure' }}
+      # ----------------------------------------------------------
+      # Create/update one GitHub Issue per persistent failure
+      #
+      # Only run automatically for pushes to main.
+      # Pull-request failures should not create permanent bugs.
+      # ----------------------------------------------------------
+      - name: Create or update GitHub bugs
+        if: >
+          ${{ always() &&
+              github.event_name == 'push' &&
+              github.ref == 'refs/heads/main' &&
+              needs.test.result != 'cancelled' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
+          PLAYWRIGHT_JSON_DIR: playwright-json
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          BUG_TRACKER_PROJECT_OWNER: vilayatalimirza
+          BUG_TRACKER_PROJECT_NUMBER: '1'
+          BUG_TRACKER_PROJECT_TITLE: Bug Tracker
+          BUG_TRACKER_STATUS: To triage
+        run: npm run report:issues
+
+      # ----------------------------------------------------------
+      # Create a high-level issue if the bug automation itself
+      # could not execute. This is optional diagnostic coverage.
+      # ----------------------------------------------------------
+      - name: Show workflow run information
+        if: ${{ always() }}
         run: |
-          gh issue create \
-           --title "🚨 Playwright Test Run Failed" \
-           --body "The automated tests failed on shard(s). Review the unified HTML report here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-           --label "bug" 
+          echo "Repository: ${{ github.repository }}"
+          echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "Test job result: ${{ needs.test.result }}"
