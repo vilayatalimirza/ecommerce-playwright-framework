@@ -50,7 +50,10 @@ function collectTests(suites, inheritedFile = '') {
           status: statuses[test.status] ?? 'unknown',
           retries: Math.max(0, attempts.length - 1),
           durationMs: Number(lastAttempt.duration ?? 0),
-          error: String(error).slice(0, 1600),
+          error: String(error)
+            .replace(/\u001b\[[0-9;]*m/g, '')
+            .replace(/\r/g, '')
+            .slice(0, 1600),
         });
       }
     }
@@ -126,7 +129,7 @@ async function main() {
       commit: commitSha,
     },
     shardCount: files.length,
-    totalTestExecutions: totalExecutions,
+    totalTestOutcomes: totalExecutions,
     counts,
     rates: {
       firstAttemptPassRate,
@@ -205,7 +208,7 @@ async function main() {
     '| Failed after retries | ' + counts.failed + ' |',
     '| Flaky (passed on retry) | ' + counts.flaky + ' |',
     '| Skipped | ' + counts.skipped + ' |',
-    '| **Total executions** | **' + totalExecutions + '** |',
+    '| **Total test outcomes** | **' + totalExecutions + '** |',
     '',
     '| Rate | Value |',
     '|---|---:|',
@@ -232,7 +235,7 @@ async function main() {
     '|---|---|---:|---|',
     ...flakyRows,
     '',
-    '> Aggregated from Playwright JSON results. Skipped tests are excluded from pass-rate denominators. Execution totals include setup-project executions in each shard; they are not unique test-case counts.',
+    '> Aggregated from Playwright JSON results. Skipped tests are excluded from pass-rate denominators. Outcome totals include setup-project executions in each shard; they are not unique test-case counts.',
     '',
   ];
 
