@@ -25,6 +25,18 @@ function percentage(numerator, denominator) {
   return denominator === 0 ? null : Number(((numerator / denominator) * 100).toFixed(1));
 }
 
+function countStatuses(items) {
+  const counts = emptyCounts();
+  for (const item of items) {
+    if (Object.hasOwn(counts, item.status)) counts[item.status] += 1;
+  }
+  return counts;
+}
+
+function testIdentity(test) {
+  return [test.file, test.line ?? '', test.title, test.project].join('|');
+}
+
 function escapeMarkdown(value) {
   return String(value ?? '').replaceAll('|', '\\|').replaceAll('\n', ' ');
 }
@@ -89,33 +101,45 @@ async function main() {
     throw new Error('No shard JSON reports (results-<shard>.json) found in ' + reportDir);
   }
 
-  const counts = emptyCounts();
   const shards = [];
-  const tests = [];
+  const allTests = [];
 
   for (const file of files) {
     const report = JSON.parse(await readFile(path.join(reportDir, file), 'utf8'));
-    const shardCounts = {
-      passed: Number(report.stats?.expected ?? 0),
-      failed: Number(report.stats?.unexpected ?? 0),
-      flaky: Number(report.stats?.flaky ?? 0),
-      skipped: Number(report.stats?.skipped ?? 0),
-    };
+    const shardTests = collectTests(report.suites);
+    const businessTests = shardTests.filter((test) => test.project !== 'setup');
+    const setupExecutions = shardTests.filter((test) => test.project === 'setup').length;
+    const shardCounts = countStatuses(businessTests);
 
-    addCounts(counts, shardCounts);
-    shards.push({ shard: file.replace(/^results-/, '').replace(/\.json$/i, ''), ...shardCounts });
-    tests.push(...collectTests(report.suites));
+    shards.push({
+      shard: file.replace(/^results-/, '').replace(/\.json$/i, ''),
+      ...shardCounts,
+      setupExecutions,
+    });
+    allTests.push(...shardTests);
   }
 
-  // Playwright's expected count excludes tests recovered by retry; flaky is kept distinct.
+  // Exclude setup-project runs and deduplicate by spec identity. This reports business
+  // test cases rather than repeated infrastructure setup or shard executions.
+  const uniqueBusinessTests = [
+    ...new Map(
+      allTests
+        .filter((test) => test.project !== 'setup')
+        .map((test) => [testIdentity(test), test]),
+    ).values(),
+  ];
+  const setupProjectExecutions = allTests.filter((test) => test.project === 'setup').length;
+  const counts = countStatuses(uniqueBusinessTests);
+  const totalScenarios = uniqueBusinessTests.length;
   const attempted = counts.passed + counts.failed + counts.flaky;
-  const totalExecutions = attempted + counts.skipped;
+  const totalTestOutcomes = attempted + counts.skipped;
+  const totalOutcomesIncludingSetup = totalTestOutcomes + setupProjectExecutions;
   const firstAttemptPassRate = percentage(counts.passed, attempted);
   const eventualSuccessRate = percentage(counts.passed + counts.flaky, attempted);
   const flakyRate = percentage(counts.flaky, attempted);
   const finalFailureRate = percentage(counts.failed, attempted);
-  const failures = tests.filter((test) => test.status === 'failed');
-  const flakyTests = tests.filter((test) => test.status === 'flaky');
+  const failures = uniqueBusinessTests.filter((test) => test.status === 'failed');
+  const flakyTests = uniqueBusinessTests.filter((test) => test.status === 'flaky');
   const generatedAt = new Date().toISOString();
 
   const metrics = {
@@ -130,7 +154,10 @@ async function main() {
       commit: commitSha,
     },
     shardCount: files.length,
-    totalTestOutcomes: totalExecutions,
+    totalScenarios,
+    totalTestOutcomes,
+    setupProjectExecutions,
+    totalOutcomesIncludingSetup,
     counts,
     rates: {
       firstAttemptPassRate,
@@ -180,6 +207,7 @@ async function main() {
     'final-success.json': makeBadge('eventual success', eventualSuccessRate === null ? 'n/a' : eventualSuccessRate + '%', successColor),
     'failed.json': makeBadge('failed after retries', String(counts.failed), counts.failed === 0 ? 'brightgreen' : 'red'),
     'flaky.json': makeBadge('flaky', String(counts.flaky), counts.flaky === 0 ? 'brightgreen' : 'yellow'),
+    'total-scenarios.json': makeBadge('business scenarios', String(totalScenarios), 'blue'),
   };
 
   for (const [file, data] of Object.entries(badges)) {
@@ -209,7 +237,10 @@ async function main() {
     '| Failed after retries | ' + counts.failed + ' |',
     '| Flaky (passed on retry) | ' + counts.flaky + ' |',
     '| Skipped | ' + counts.skipped + ' |',
-    '| **Total test outcomes** | **' + totalExecutions + '** |',
+    '| **Business test scenarios** | **' + totalScenarios + '** |',
+    '| **Business test outcomes** | **' + totalTestOutcomes + '** |',
+    '| Setup project executions (excluded) | ' + setupProjectExecutions + ' |',
+    '| Total outcomes including setup | ' + totalOutcomesIncludingSetup + ' |',
     '',
     '| Rate | Value |',
     '|---|---:|',
@@ -220,9 +251,9 @@ async function main() {
     '',
     '**Shards:** ' + files.length,
     '',
-    '| Shard | Passed | Failed | Flaky | Skipped |',
-    '|---:|---:|---:|---:|---:|',
-    ...shards.map((shard) => '| ' + shard.shard + ' | ' + shard.passed + ' | ' + shard.failed + ' | ' + shard.flaky + ' | ' + shard.skipped + ' |'),
+    '| Shard | Passed | Failed | Flaky | Skipped | Setup runs |',
+    '|---:|---:|---:|---:|---:|---:|',
+    ...shards.map((shard) => '| ' + shard.shard + ' | ' + shard.passed + ' | ' + shard.failed + ' | ' + shard.flaky + ' | ' + shard.skipped + ' | ' + shard.setupExecutions + ' |'),
     '',
     '### Final failures',
     '',
@@ -236,7 +267,7 @@ async function main() {
     '|---|---|---:|---|',
     ...flakyRows,
     '',
-    '> Aggregated from Playwright JSON results. Skipped tests are excluded from pass-rate denominators. Outcome totals include setup-project executions in each shard; they are not unique test-case counts.',
+    '> Business scenario metrics deduplicate by spec identity and exclude setup-project executions. Skipped scenarios are excluded from pass-rate denominators. Setup executions are displayed separately.'
     '',
   ];
 
