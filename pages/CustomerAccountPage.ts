@@ -217,8 +217,13 @@ export class CustomerAccountPage {
       void dialog.accept();
     });
 
-    await deleteButton.click();
+    // The delete handler navigates to a server endpoint that redirects back
+    // to the address list. Do not make the click wait for that navigation.
+    await deleteButton.click({ noWaitAfter: true });
 
+    await expect(this.page).toHaveURL(/customer\\/addresses/i, {
+      timeout: 45_000,
+    });
     await expect(this.addressCards).toHaveCount(initialAddressCount - 1, {
       timeout: 30_000,
     });
