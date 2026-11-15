@@ -51,6 +51,15 @@ function escapeMarkdown(value) {
   return String(value ?? '').replaceAll('|', '\\|').replaceAll('\n', ' ');
 }
 
+function stripAnsi(value) {
+  const escape = String.fromCharCode(27);
+
+  return String(value)
+    .split(escape)
+    .map((part, index) => (index === 0 ? part : part.replace(/^[0-9;]*m/, '')))
+    .join('');
+}
+
 function collectTests(suites, inheritedFile = '') {
   const collected = [];
 
@@ -72,7 +81,7 @@ function collectTests(suites, inheritedFile = '') {
           status: test.status ?? 'unknown',
           retries: Math.max(0, attempts.length - 1),
           durationMs: Number(lastAttempt.duration ?? 0),
-          error: String(error).replace(/\u001b\[[0-9;]*m/g, '').slice(0, 1600),
+          error: stripAnsi(error).slice(0, 1600),
         });
       }
     }
