@@ -87,7 +87,7 @@ test.describe('Checkout Constraints & Calculations', () => {
     await checkoutPage.selectShippingMethod('Ground');
     await checkoutPage.selectPaymentMethod('Credit Card');
 
-    await checkoutPage.continuePaymentInfo();
+    await checkoutPage.submitPaymentInfoForValidation();
 
     await expect(checkoutPage.confirmOrderSection).not.toHaveClass(/active/);
     await expect(checkoutPage.paymentInfoSection).toHaveClass(/active/);
