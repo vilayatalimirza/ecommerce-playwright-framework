@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/BaseTest';
-import users from '../data/users.json';
 import { uniqueEmail } from '../utils/test-data';
+import { loadAuthUser } from '../utils/auth-user';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -51,10 +51,12 @@ test.describe('Registration Form Validation', () => {
   test('Registration with an already existing email is rejected @regression', async ({
     registerPage,
   }) => {
+    const existingUser = await loadAuthUser();
+
     await registerPage.navigate();
     await registerPage.firstNameInput.fill('Duplicate');
     await registerPage.lastNameInput.fill('Account');
-    await registerPage.emailInput.fill(users.validUser.email);
+    await registerPage.emailInput.fill(existingUser.email);
     await registerPage.passwordInput.fill('Password123!');
     await registerPage.confirmPasswordInput.fill('Password123!');
     await registerPage.registerButton.click();
