@@ -1,12 +1,20 @@
-
-# Playwright
+# Dependencies
 node_modules/
+
+# Playwright output
 /test-results/
 /playwright-report/
 /blob-report/
+/all-blob-reports/
+/playwright-json/
+/ci-report/
 /playwright/.cache/
 /playwright/.auth/
-.env
 
-# Allow Playwright snapshot baseline images
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Keep visual baseline snapshots under version control
 !tests/**/*-snapshots/*.png
