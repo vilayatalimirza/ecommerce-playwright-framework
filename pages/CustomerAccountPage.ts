@@ -209,28 +209,34 @@ export class CustomerAccountPage {
   async deleteAddress(cardIndex = 0): Promise<void> {
     const card = this.addressCards.nth(cardIndex);
     const deleteButton = card.locator('input[value="Delete"], .delete-address-button').first();
+    const initialAddressCount = await this.addressCards.count();
 
-    const onclick = await deleteButton.getAttribute('onclick');
-    const deleteUrl = onclick?.match(/\/customer\/addressdelete\/\d+/)?.[0];
+    // Exercise the same confirmation and navigation path as a real customer.
+    // Avoid bypassing the UI with page.request, which can conceal browser/session issues.
+    this.page.once('dialog', (dialog) => {
+      void dialog.accept();
+    });
 
-    if (deleteUrl) {
-      // 1. Execute deletion directly at the HTTP layer using existing session cookies
-      await this.page.request.get(deleteUrl, { timeout: 60_000 });
+    // Trigger the actual confirmation handler and observe the outgoing request.
+    // The demo server can leave the delete navigation pending, so do not wait for
+    // the document response before returning to the address list.
+    const deleteRequestPromise = this.page.waitForRequest(
+      (request) => request.url().includes('/customer/addressdelete/'),
+      { timeout: 30_000 },
+    );
 
-      // 2. Refresh the addresses view to reflect the updated state
-      await this.page.goto('/customer/addresses', {
-        waitUntil: 'domcontentloaded',
-        timeout: 60_000,
-      });
-    } else {
-      // Fallback if onclick pattern changes
-      this.page.once('dialog', dialog => void dialog.accept());
-      await deleteButton.click({ noWaitAfter: true });
-      await this.page.waitForURL(/\/customer\/addresses/i, {
-        waitUntil: 'domcontentloaded',
-        timeout: 60_000,
-      });
-    }
+    await deleteButton.click({ noWaitAfter: true });
+    await deleteRequestPromise;
+
+    // Reload the list after the server has received the delete request.
+    await this.page.goto('/customer/addresses', {
+      waitUntil: 'domcontentloaded',
+      timeout: 30_000,
+    });
+
+    await expect(this.addressCards).toHaveCount(initialAddressCount - 1, {
+      timeout: 30_000,
+    });
   }
 
   // Order Details Actions

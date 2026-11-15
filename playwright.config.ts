@@ -2,21 +2,15 @@ import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
 
 const isCI = process.env.CI === 'true';
+const parsedWorkers = Number(process.env.PLAYWRIGHT_WORKERS ?? 2);
+const workers = Number.isInteger(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : 2;
 
 export default defineConfig({
   testDir: './tests',
-
-  // Run tests sequentially within a file to reduce state collisions
-  // against the shared demo store.
   fullyParallel: false,
-
-  // Use 2 workers locally.
-  // Can be overridden with PLAYWRIGHT_WORKERS when troubleshooting.
-  workers: process.env.PLAYWRIGHT_WORKERS ? Number(process.env.PLAYWRIGHT_WORKERS) : 2,
-
-  // Retry failed tests once in CI.
+  workers,
   retries: isCI ? 1 : 0,
-
+  forbidOnly: isCI,
   timeout: 60_000,
 
   expect: {
@@ -24,6 +18,8 @@ export default defineConfig({
   },
 
   reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['blob', { outputDir: 'blob-report' }],
     [
       'json',
@@ -35,20 +31,15 @@ export default defineConfig({
 
   use: {
     baseURL: process.env.BASE_URL ?? 'https://demowebshop.tricentis.com',
-
-    // Use the generated authenticated session by default.
     storageState: 'playwright/.auth/user.json',
-
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
   },
 
   projects: [
-    // Generate authentication state before the main test project.
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
@@ -59,11 +50,9 @@ export default defineConfig({
         },
       },
     },
-
     {
       name: 'chromium',
       dependencies: ['setup'],
-
       use: {
         ...devices['Desktop Chrome'],
       },
