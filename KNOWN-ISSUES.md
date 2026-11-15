@@ -1,59 +1,85 @@
-# Known Test Findings
+# Known Test Findings and Run History
 
-This file records observable findings from the latest portfolio-readiness validation. It distinguishes target-application behaviour from automation/environment problems. Findings are not silently converted into passing tests.
+This file preserves failures observed during portfolio-readiness work. A finding is not deleted simply because a later public-demo run happens to pass; its current reproduction status is recorded separately.
 
-## Latest validation run
+## Latest validation
 
-- GitHub Actions: [run #51](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43764634104)
+- Workflow: [#55](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43766242370)
 - Pull request: [#7](https://github.com/vilayatalimirza/ecommerce-playwright-framework/pull/7)
 - Date: 15 November 2026
 - Browser: Chromium
-- CI distribution: 4 shards
-- Unique business scenarios: 91
-- Outcome: 89 passed, 1 failed, 0 flaky, 1 skipped
-- Setup project: 4 executions, excluded from business metrics
-- First-attempt pass rate: 98.9% (89 / 90 non-skipped scenarios)
-- Eventual success rate: 98.9% (89 / 90 non-skipped scenarios)
+- Execution: 4 CI shards
+- Workflow result: **SUCCESS**
 
-The merged CI report has 95 total outcomes when the four setup-project executions are included. The business metrics exclude those infrastructure runs.
+| Functional outcome | Count |
+|---|---:|
+| Passed on first attempt | 90 |
+| Failed after retries | 0 |
+| Flaky (passed on retry) | 0 |
+| Skipped | 1 |
+| **Total functional outcomes** | **91** |
 
-## Finding 1: Address deletion request does not remove the saved address
+Four authentication setup executions also passed. They are not included in the functional totals or the pass-rate denominator.
+
+| Functional rate | Value |
+|---|---:|
+| First-attempt pass rate | 100% |
+| Eventual success rate | 100% |
+| Flaky rate | 0% |
+| Final failure rate | 0% |
+| Passed outcomes with the skip included in the denominator | 98.9% |
+
+The one skipped test is intentional: the volume-tier pricing test detects that the selected public demo product does not have tier pricing configured.
+
+## Historical failures: runs #29 and #30
+
+Both [run #29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43759189266) and [run #30](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43760122956) recorded the same functional outcomes:
+
+| Functional outcome | Count |
+|---|---:|
+| Passed on first attempt | 88 |
+| Failed after retries | 2 |
+| Flaky | 0 |
+| Skipped | 1 |
+| Authentication setup passed | 4 |
+
+The two failures below were reproduced in both runs. Neither reproduced in run #55. Because the target is a shared public demo site, one successful run is not enough to declare the underlying behaviour permanently fixed. These remain watch-list items until they have been stable across repeated runs.
+
+### 1. Customer address deletion navigation stalled
 
 | Field | Observation |
 |---|---|
-| Test | `tests/account/account-management.spec.ts` — Customer can delete an address card |
-| Result | Failed after retry |
-| Observed behaviour | The browser accepts the Delete confirmation and issues a request to `/customer/addressdelete/{id}`. The test then returns to `/customer/addresses`, but the address card is still present |
-| Expected behaviour | The selected address should be deleted and the customer address list should contain zero cards |
-| Classification | Target application behaviour / demo data service issue suspected; root cause is not confirmed |
-| Evidence | [Run #51](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43764634104) |
+| Test | `tests/account-management.spec.ts` — customer can delete an address card |
+| Historical result | Failed in runs #29 and #30 |
+| Observed behaviour | After accepting the browser confirmation, navigation remained at `/customer/addressdelete/{id}` and did not return to `/customer/addresses` before the 45-second assertion timeout |
+| Current status | **Not reproduced in run #55** |
+| Evidence | [Run #29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43759189266), [Run #30](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43760122956), [latest run #55](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43766242370) |
 
-The test uses the actual UI confirmation and observes the outgoing request. It does not bypass the application by issuing a direct HTTP request. The failure is retained because the application did not remove the address in the observed run.
+The helper now uses the browser's real delete button and confirmation dialog, and avoids waiting for navigation inside the click action. It still asserts that the browser returns to the address list and that the address card count decreases. The earlier navigation stall is retained as historical evidence.
 
-## Intentional skip: Volume-tier pricing is not configured
+### 2. Empty Purchase Order validation did not block checkout
 
 | Field | Observation |
 |---|---|
-| Test | `tests/catalog/configurable-products.spec.ts` — product detail displays volume tier pricing |
-| Result | Skipped |
-| Reason | The test checks whether the tier-pricing block is configured on `/fiction`; when it is absent, it calls `test.skip` with the reason “Volume tier pricing is not configured on this product in Demo Web Shop” |
-| Classification | Test-data / target configuration limitation, not an automation failure |
+| Test | `tests/checkout-validation.spec.ts` — Purchase Order blocks submission when PO number is empty |
+| Historical result | Failed in runs #29 and #30 |
+| Observed behaviour | The test's assertion timed out because the confirmation accordion remained active after the Purchase Order number was cleared |
+| Expected behaviour | Checkout should reject the empty Purchase Order number before allowing the order to reach confirmation |
+| Current status | **Not reproduced in run #55** |
+| Evidence | [Run #29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43759189266), [Run #30](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43760122956), [latest run #55](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43766242370) |
 
-## Previously observed behaviour that did not recur in run #51
+The checkout page object now waits for the loading indicator belonging to the active checkout step instead of using a page-wide text locator. The latest run passed the validation scenario. Continue monitoring it before claiming the application behaviour is permanently fixed.
 
-- The empty Purchase Order submission and missing Credit Card detail checks passed in run #51 after separating validation-only submissions from the success-path checkout helper.
-- Digital-product checkout now supports the path that skips shipping and proceeds directly to payment.
-- The old checkout “Loading next step” locator ambiguity is no longer reported in the current CI run.
+## How to interpret the metrics
 
-These changes are kept in the branch because they are supported by the latest validation, not merely because the tests were made to pass.
-
-## How to interpret the dashboard
-
-- **Passed:** completed without needing a retry.
-- **Flaky:** failed on an earlier attempt but passed on retry.
-- **Failed:** remained unsuccessful after the configured retry.
-- **Skipped:** did not execute because the test explicitly detected unavailable scenario configuration.
+- **Passed:** functional test passed on its first attempt.
+- **Flaky:** failed at least once, then passed on retry.
+- **Failed:** remained unsuccessful after configured retries.
+- **Skipped:** did not execute because the test explicitly detected an unavailable scenario or configuration.
 - **First-attempt pass rate:** passed ÷ (passed + flaky + failed).
 - **Eventual success rate:** (passed + flaky) ÷ (passed + flaky + failed).
+- **Setup executions:** authentication setup runs required to prepare an authenticated session. They are reported separately and excluded from functional test rates.
 
-Skipped scenarios are excluded from both rate denominators. A failed workflow remains failed even when the pass percentage is high.
+Skipped tests are excluded from both pass-rate denominators. The separate “passed outcomes with the skip included” figure is a completion-inclusive ratio, not the pass-rate badge.
+
+A workflow is successful only when the required quality checks and all CI shards complete successfully.
