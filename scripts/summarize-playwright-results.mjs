@@ -5,6 +5,7 @@ import process from 'node:process';
 const reportDir = process.env.PLAYWRIGHT_JSON_DIR ?? 'playwright-json';
 const metricsDir = process.env.METRICS_DIR ?? 'metrics';
 const outputDir = process.env.CI_REPORT_DIR ?? 'ci-report';
+const ansiCodePattern = new RegExp(String.fromCharCode(27) + '\\[[0-9;]*m', 'g');
 
 const runId = process.env.GITHUB_RUN_ID ?? 'local';
 const runNumber = Number(process.env.GITHUB_RUN_NUMBER ?? 0);
@@ -51,7 +52,7 @@ function collectTests(suites, inheritedFile = '') {
           retries: Math.max(0, attempts.length - 1),
           durationMs: Number(lastAttempt.duration ?? 0),
           error: String(error)
-            .replace(/\u001b\[[0-9;]*m/g, '')
+            .replace(ansiCodePattern, '')
             .replace(/\r/g, '')
             .slice(0, 1600),
         });
