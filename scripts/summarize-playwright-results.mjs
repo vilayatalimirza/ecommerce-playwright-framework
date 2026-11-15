@@ -1,5 +1,6 @@
 import { appendFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import process from 'node:process';
 
 const reportDir = process.env.PLAYWRIGHT_JSON_DIR ?? 'playwright-json';
 const metricsDir = process.env.METRICS_DIR ?? 'metrics';
