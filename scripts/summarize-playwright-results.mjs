@@ -5,32 +5,46 @@ import process from 'node:process';
 const reportDir = process.env.PLAYWRIGHT_JSON_DIR ?? 'playwright-json';
 const metricsDir = process.env.METRICS_DIR ?? 'metrics';
 const outputDir = process.env.CI_REPORT_DIR ?? 'ci-report';
-const ansiCodePattern = new RegExp(String.fromCharCode(27) + '\\[[0-9;]*m', 'g');
 
 const runId = process.env.GITHUB_RUN_ID ?? 'local';
 const runNumber = Number(process.env.GITHUB_RUN_NUMBER ?? 0);
 const repository = process.env.GITHUB_REPOSITORY ?? 'vilayatalimirza/ecommerce-playwright-framework';
 const serverUrl = process.env.GITHUB_SERVER_URL ?? 'https://github.com';
 const commitSha = process.env.GITHUB_SHA ?? 'unknown';
-const branch = process.env.GITHUB_REF_NAME ?? 'local';
+const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || 'local';
+const event = process.env.GITHUB_EVENT_NAME ?? 'local';
 const runUrl = runId === 'local' ? null : serverUrl + '/' + repository + '/actions/runs/' + runId;
 
 const emptyCounts = () => ({ passed: 0, failed: 0, flaky: 0, skipped: 0 });
 
-function percentage(numerator, denominator) {
-  return denominator === 0 ? null : Number(((numerator / denominator) * 100).toFixed(1));
+const statusToOutcome = {
+  expected: 'passed',
+  unexpected: 'failed',
+  flaky: 'flaky',
+  skipped: 'skipped',
+};
+
+function addCounts(target, source) {
+  for (const key of Object.keys(target)) target[key] += Number(source[key] ?? 0);
 }
 
-function countStatuses(items) {
+function countOutcomes(testResults) {
   const counts = emptyCounts();
-  for (const item of items) {
-    if (Object.hasOwn(counts, item.status)) counts[item.status] += 1;
+
+  for (const test of testResults) {
+    const outcome = statusToOutcome[test.status];
+    if (outcome) counts[outcome] += 1;
   }
+
   return counts;
 }
 
-function testIdentity(test) {
-  return [test.file, test.line ?? '', test.title, test.project].join('|');
+function totalCounts(counts) {
+  return counts.passed + counts.failed + counts.flaky + counts.skipped;
+}
+
+function percentage(numerator, denominator) {
+  return denominator === 0 ? null : Number(((numerator / denominator) * 100).toFixed(1));
 }
 
 function escapeMarkdown(value) {
@@ -39,7 +53,6 @@ function escapeMarkdown(value) {
 
 function collectTests(suites, inheritedFile = '') {
   const collected = [];
-  const statuses = { expected: 'passed', unexpected: 'failed', flaky: 'flaky', skipped: 'skipped' };
 
   for (const suite of suites ?? []) {
     const file = suite.file ?? inheritedFile;
@@ -56,13 +69,10 @@ function collectTests(suites, inheritedFile = '') {
           file: spec.file ?? file,
           line: spec.line ?? null,
           project: test.projectName ?? 'unknown',
-          status: statuses[test.status] ?? 'unknown',
+          status: test.status ?? 'unknown',
           retries: Math.max(0, attempts.length - 1),
           durationMs: Number(lastAttempt.duration ?? 0),
-          error: String(error)
-            .replace(ansiCodePattern, '')
-            .replace(/\r/g, '')
-            .slice(0, 1600),
+          error: String(error).replace(/\u001b\[[0-9;]*m/g, '').slice(0, 1600),
         });
       }
     }
@@ -90,71 +100,73 @@ async function readHistory(historyPath) {
 async function main() {
   const entries = await readdir(reportDir);
   const files = entries
-    .filter((name) => /^results-\d+\.json$/i.test(name))
+    .filter((name) => /^results(?:-\d+)?\.json$/i.test(name))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   if (files.length === 0) {
-    throw new Error('No shard JSON reports (results-<shard>.json) found in ' + reportDir);
+    throw new Error('No Playwright JSON reports found in ' + reportDir);
   }
 
+  const functionalCounts = emptyCounts();
+  const setupCounts = emptyCounts();
   const shards = [];
-  const allTests = [];
+  const functionalTests = [];
+  const setupTests = [];
 
   for (const file of files) {
     const report = JSON.parse(await readFile(path.join(reportDir, file), 'utf8'));
     const shardTests = collectTests(report.suites);
-    const businessTests = shardTests.filter((test) => test.project !== 'setup');
-    const setupExecutions = shardTests.filter((test) => test.project === 'setup').length;
-    const shardCounts = countStatuses(businessTests);
+    const shardFunctionalTests = shardTests.filter((test) => test.project !== 'setup');
+    const shardSetupTests = shardTests.filter((test) => test.project === 'setup');
+    const shardFunctionalCounts = countOutcomes(shardFunctionalTests);
+    const shardSetupCounts = countOutcomes(shardSetupTests);
+
+    addCounts(functionalCounts, shardFunctionalCounts);
+    addCounts(setupCounts, shardSetupCounts);
+    functionalTests.push(...shardFunctionalTests);
+    setupTests.push(...shardSetupTests);
 
     shards.push({
-      shard: file.replace(/^results-/, '').replace(/\.json$/i, ''),
-      ...shardCounts,
-      setupExecutions,
+      shard: file.replace(/^results-/, '').replace(/\.json$/i, '') || 'local',
+      ...shardFunctionalCounts,
+      setupPassed: shardSetupCounts.passed,
+      setupFailed: shardSetupCounts.failed,
+      setupSkipped: shardSetupCounts.skipped,
+      totalOutcomes: totalCounts(shardFunctionalCounts) + totalCounts(shardSetupCounts),
     });
-    allTests.push(...shardTests);
   }
 
-  // Exclude setup-project runs and deduplicate by spec identity. This reports business
-  // test cases rather than repeated infrastructure setup or shard executions.
-  const uniqueBusinessTests = [
-    ...new Map(
-      allTests
-        .filter((test) => test.project !== 'setup')
-        .map((test) => [testIdentity(test), test]),
-    ).values(),
-  ];
-  const setupProjectExecutions = allTests.filter((test) => test.project === 'setup').length;
-  const counts = countStatuses(uniqueBusinessTests);
-  const totalScenarios = uniqueBusinessTests.length;
-  const attempted = counts.passed + counts.failed + counts.flaky;
-  const totalTestOutcomes = attempted + counts.skipped;
-  const totalOutcomesIncludingSetup = totalTestOutcomes + setupProjectExecutions;
-  const firstAttemptPassRate = percentage(counts.passed, attempted);
-  const eventualSuccessRate = percentage(counts.passed + counts.flaky, attempted);
-  const flakyRate = percentage(counts.flaky, attempted);
-  const finalFailureRate = percentage(counts.failed, attempted);
-  const failures = uniqueBusinessTests.filter((test) => test.status === 'failed');
-  const flakyTests = uniqueBusinessTests.filter((test) => test.status === 'flaky');
+  // The setup project creates a session used by tests. Its runs are reported
+  // separately and excluded from the functional test pass-rate denominator.
+  const functionalOutcomes = totalCounts(functionalCounts);
+  const setupOutcomes = totalCounts(setupCounts);
+  const attempted = functionalCounts.passed + functionalCounts.failed + functionalCounts.flaky;
+  const firstAttemptPassRate = percentage(functionalCounts.passed, attempted);
+  const eventualSuccessRate = percentage(functionalCounts.passed + functionalCounts.flaky, attempted);
+  const flakyRate = percentage(functionalCounts.flaky, attempted);
+  const finalFailureRate = percentage(functionalCounts.failed, attempted);
+  const failures = functionalTests.filter((test) => test.status === 'unexpected');
+  const flakyTests = functionalTests.filter((test) => test.status === 'flaky');
   const generatedAt = new Date().toISOString();
 
   const metrics = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt,
-    source: 'Playwright JSON reporter, aggregated from CI shards',
+    source: 'Playwright JSON reporter; functional tests separated from setup project',
     run: {
       id: runId,
       number: runNumber || null,
       url: runUrl,
       branch,
+      event,
       commit: commitSha,
     },
     shardCount: files.length,
-    totalScenarios,
-    totalTestOutcomes,
-    setupProjectExecutions,
-    totalOutcomesIncludingSetup,
-    counts,
+    totalFunctionalOutcomes: functionalOutcomes,
+    totalSetupExecutions: setupOutcomes,
+    totalOutcomesIncludingSetup: functionalOutcomes + setupOutcomes,
+    counts: functionalCounts,
+    setup: setupCounts,
     rates: {
       firstAttemptPassRate,
       eventualSuccessRate,
@@ -162,6 +174,7 @@ async function main() {
       finalFailureRate,
       denominator: attempted,
       skippedExcluded: true,
+      setupProjectExcluded: true,
     },
     failures,
     flakyTests,
@@ -179,10 +192,10 @@ async function main() {
     runUrl,
     generatedAt,
     branch,
+    event,
     commit: commitSha,
-    counts,
-    totalScenarios,
-    setupProjectExecutions,
+    counts: functionalCounts,
+    setup: setupCounts,
     firstAttemptPassRate,
     eventualSuccessRate,
     flakyRate,
@@ -203,9 +216,8 @@ async function main() {
   const badges = {
     'pass-rate.json': makeBadge('first-attempt pass', firstAttemptPassRate === null ? 'n/a' : firstAttemptPassRate + '%', passColor),
     'final-success.json': makeBadge('eventual success', eventualSuccessRate === null ? 'n/a' : eventualSuccessRate + '%', successColor),
-    'failed.json': makeBadge('failed after retries', String(counts.failed), counts.failed === 0 ? 'brightgreen' : 'red'),
-    'flaky.json': makeBadge('flaky', String(counts.flaky), counts.flaky === 0 ? 'brightgreen' : 'yellow'),
-    'total-scenarios.json': makeBadge('business scenarios', String(totalScenarios), 'blue'),
+    'failed.json': makeBadge('failed after retries', String(functionalCounts.failed), functionalCounts.failed === 0 ? 'brightgreen' : 'red'),
+    'flaky.json': makeBadge('flaky', String(functionalCounts.flaky), functionalCounts.flaky === 0 ? 'brightgreen' : 'yellow'),
   };
 
   for (const [file, data] of Object.entries(badges)) {
@@ -224,34 +236,43 @@ async function main() {
     '## Playwright execution summary',
     '',
     runUrl
-      ? '**Workflow:** Run #' + runNumber + ' · Branch: ' + branch + ' · Commit: ' + commitSha.slice(0, 7)
+      ? '**Workflow:** Run #' + runNumber + ' · **Branch:** ' + branch + ' · **Event:** ' + event + ' · **Commit:** ' + commitSha.slice(0, 7)
       : '**Workflow:** Local report aggregation',
     '',
-    '**Overall result:** ' + (counts.failed > 0 ? 'FAILED' : counts.flaky > 0 ? 'PASSED WITH FLAKINESS' : 'PASSED'),
+    '**Overall result:** ' + (functionalCounts.failed > 0 ? 'FAILED' : functionalCounts.flaky > 0 ? 'PASSED WITH FLAKINESS' : 'PASSED'),
+    '',
+    '### Functional test outcomes (setup excluded)',
     '',
     '| Outcome | Count |',
     '|---|---:|',
-    '| Passed on first attempt | ' + counts.passed + ' |',
-    '| Failed after retries | ' + counts.failed + ' |',
-    '| Flaky (passed on retry) | ' + counts.flaky + ' |',
-    '| Skipped | ' + counts.skipped + ' |',
-    '| **Business test scenarios** | **' + totalScenarios + '** |',
-    '| **Business test outcomes** | **' + totalTestOutcomes + '** |',
-    '| Setup project executions (excluded) | ' + setupProjectExecutions + ' |',
-    '| Total outcomes including setup | ' + totalOutcomesIncludingSetup + ' |',
+    '| Passed on first attempt | ' + functionalCounts.passed + ' |',
+    '| Failed after retries | ' + functionalCounts.failed + ' |',
+    '| Flaky (passed on retry) | ' + functionalCounts.flaky + ' |',
+    '| Skipped | ' + functionalCounts.skipped + ' |',
+    '| **Total functional outcomes** | **' + functionalOutcomes + '** |',
     '',
-    '| Rate | Value |',
+    '### Authentication setup executions',
+    '',
+    '| Outcome | Count |',
+    '|---|---:|',
+    '| Passed | ' + setupCounts.passed + ' |',
+    '| Failed | ' + setupCounts.failed + ' |',
+    '| Skipped | ' + setupCounts.skipped + ' |',
+    '| **Total setup executions** | **' + setupOutcomes + '** |',
+    '',
+    '| Functional rate | Value |',
     '|---|---:|',
     '| First-attempt pass rate | ' + (firstAttemptPassRate === null ? 'n/a' : firstAttemptPassRate + '%') + ' |',
     '| Eventual success rate | ' + (eventualSuccessRate === null ? 'n/a' : eventualSuccessRate + '%') + ' |',
     '| Flaky rate | ' + (flakyRate === null ? 'n/a' : flakyRate + '%') + ' |',
     '| Final failure rate | ' + (finalFailureRate === null ? 'n/a' : finalFailureRate + '%') + ' |',
     '',
+    '**Total outcomes including setup:** ' + (functionalOutcomes + setupOutcomes),
     '**Shards:** ' + files.length,
     '',
-    '| Shard | Passed | Failed | Flaky | Skipped | Setup runs |',
+    '| Shard | Functional pass | Failed | Flaky | Skipped | Setup pass |',
     '|---:|---:|---:|---:|---:|---:|',
-    ...shards.map((shard) => '| ' + shard.shard + ' | ' + shard.passed + ' | ' + shard.failed + ' | ' + shard.flaky + ' | ' + shard.skipped + ' | ' + shard.setupExecutions + ' |'),
+    ...shards.map((shard) => '| ' + shard.shard + ' | ' + shard.passed + ' | ' + shard.failed + ' | ' + shard.flaky + ' | ' + shard.skipped + ' | ' + shard.setupPassed + ' |'),
     '',
     '### Final failures',
     '',
@@ -265,7 +286,7 @@ async function main() {
     '|---|---|---:|---|',
     ...flakyRows,
     '',
-    '> Business scenario metrics deduplicate by spec identity and exclude setup-project executions. Skipped scenarios are excluded from pass-rate denominators. Setup executions are displayed separately.',
+    '> Rates are calculated from functional test outcomes only. Skipped tests and setup-project executions are excluded from rate denominators. Setup executions are reported separately.',
     '',
   ];
 
