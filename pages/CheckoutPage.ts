@@ -33,11 +33,6 @@ export class CheckoutPage {
   readonly paymentMethodContinueButton: Locator;
   readonly paymentInfoContinueButton: Locator;
   readonly confirmOrderButton: Locator;
-  readonly billingPleaseWait: Locator;
-  readonly shippingPleaseWait: Locator;
-  readonly shippingMethodPleaseWait: Locator;
-  readonly paymentMethodPleaseWait: Locator;
-  readonly paymentInfoPleaseWait: Locator;
 
   // Confirmation Elements
   readonly orderSuccessMessage: Locator;
@@ -87,11 +82,6 @@ export class CheckoutPage {
     this.confirmOrderButton = page.locator(
       '#confirm-order-buttons-container input[value="Confirm"], #opc-confirm_order input.confirm-order-next-step-button',
     );
-    this.billingPleaseWait = page.locator('#billing-please-wait');
-    this.shippingPleaseWait = page.locator('#shipping-please-wait');
-    this.shippingMethodPleaseWait = page.locator('#shipping-method-please-wait');
-    this.paymentMethodPleaseWait = page.locator('#payment-method-please-wait');
-    this.paymentInfoPleaseWait = page.locator('#payment-info-please-wait');
 
     // Success State
     this.orderSuccessMessage = page.getByText('Your order has been successfully processed!');
@@ -116,8 +106,10 @@ export class CheckoutPage {
     this.orderTotalText = this.rowValueByLabel('Total:');
   }
 
-  private async waitForStepTransition(loadingIndicator: Locator): Promise<void> {
-    await expect(loadingIndicator).toBeHidden({ timeout: 45_000 });
+  private async waitForStepTransition(nextStep: Locator): Promise<void> {
+    // A hidden spinner can be hidden before the AJAX request starts.
+    // The next active accordion step is the reliable checkout state change.
+    await expect(nextStep).toHaveClass(/active/, { timeout: 45_000 });
   }
 
   private rowValueByLabel(labelText: string): Locator {
@@ -150,19 +142,19 @@ export class CheckoutPage {
     await this.billingSection.getByLabel('Phone number:').fill(address.phoneNumber);
 
     await this.billingContinueButton.click();
-    await this.waitForStepTransition(this.billingPleaseWait);
+    await this.waitForStepTransition(this.shippingSection);
   }
 
   async selectSavedBillingAddress(optionLabel: string): Promise<void> {
     await this.billingAddressSelect.selectOption({ label: optionLabel });
     await this.billingContinueButton.click();
-    await this.waitForStepTransition(this.billingPleaseWait);
+    await this.waitForStepTransition(this.shippingSection);
   }
 
   async continueShippingAddress(): Promise<void> {
     await expect(this.shippingContinueButton).toBeVisible({ timeout: 15000 });
     await this.shippingContinueButton.click();
-    await this.waitForStepTransition(this.shippingPleaseWait);
+    await this.waitForStepTransition(this.shippingMethodSection);
   }
 
   async selectShippingMethod(methodName: ShippingMethod): Promise<void> {
@@ -174,7 +166,7 @@ export class CheckoutPage {
         '#shipping-method-buttons-container input[value="Continue"], input.shipping-method-next-step-button',
       )
       .click();
-    await this.waitForStepTransition(this.shippingMethodPleaseWait);
+    await this.waitForStepTransition(this.paymentMethodSection);
   }
 
   async selectPaymentMethod(methodName: PaymentMethod): Promise<void> {
@@ -182,13 +174,13 @@ export class CheckoutPage {
     await expect(label.first()).toBeVisible({ timeout: 15000 });
     await label.first().click();
     await this.paymentMethodContinueButton.click();
-    await this.waitForStepTransition(this.paymentMethodPleaseWait);
+    await this.waitForStepTransition(this.paymentInfoSection);
   }
 
   async continuePaymentInfo(): Promise<void> {
     await expect(this.paymentInfoContinueButton).toBeVisible({ timeout: 15000 });
     await this.paymentInfoContinueButton.click();
-    await this.waitForStepTransition(this.paymentInfoPleaseWait);
+    await this.waitForStepTransition(this.confirmOrderSection);
   }
 
   async confirmOrder(): Promise<void> {
