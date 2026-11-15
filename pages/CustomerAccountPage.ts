@@ -221,7 +221,7 @@ export class CustomerAccountPage {
     // to the address list. Do not make the click wait for that navigation.
     await deleteButton.click({ noWaitAfter: true });
 
-    await expect(this.page).toHaveURL(/customer\\/addresses/i, {
+    await expect(this.page).toHaveURL(/customer\/addresses/i, {
       timeout: 45_000,
     });
     await expect(this.addressCards).toHaveCount(initialAddressCount - 1, {
