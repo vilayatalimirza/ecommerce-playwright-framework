@@ -43,7 +43,7 @@ Until this pull request is merged and a new main-branch workflow runs, the main-
 
 ## Coverage
 
-The current suite includes scenarios for:
+The [test suite map](tests/README.md) groups the specs by business capability. The current suite includes scenarios for:
 
 - Registration, login and invalid authentication.
 - Product catalogue, product details, search and sorting.
@@ -111,9 +111,13 @@ npm test
 npm run test:smoke
 npm run test:sanity
 
-# Tiered suites for troubleshooting
-npm run test:tier1
-npm run test:tier2
+# Focused suites by business domain
+npm run test:auth
+npm run test:catalog
+npm run test:cart
+npm run test:checkout
+npm run test:account
+npm run test:quality
 
 # Interactive Playwright UI
 npx playwright test --ui
