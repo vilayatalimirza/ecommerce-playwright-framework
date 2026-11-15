@@ -7,13 +7,15 @@
     "branch": "main",
     "commit": "465eba58d03eabae321f31246b46ee28103c70b0",
     "counts": {
-      "passed": 86,
+      "passed": 82,
       "failed": 2,
       "flaky": 6,
       "skipped": 1
     },
-    "firstAttemptPassRate": 91.5,
-    "eventualSuccessRate": 97.9,
-    "flakyRate": 6.4
+    "totalScenarios": 91,
+    "setupProjectExecutions": 4,
+    "firstAttemptPassRate": 91.1,
+    "eventualSuccessRate": 97.8,
+    "flakyRate": 6.7
   }
 ]
