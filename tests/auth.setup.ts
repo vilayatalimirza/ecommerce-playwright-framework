@@ -1,19 +1,26 @@
-import { test as setup, expect } from '@playwright/test';
+import { mkdir, writeFile } from 'node:fs/promises';
 
-import userData from '../data/users.json';
+import { test as setup, expect } from '../fixtures/BaseTest';
+import { DataFactory } from '../utils/DataFactory';
 
-const authFile = 'playwright/.auth/user.json';
+const authDirectory = 'playwright/.auth';
+const authFile = authDirectory + '/user.json';
+const credentialsFile = authDirectory + '/credentials.json';
 
-setup('authenticate', async ({ page }) => {
-  await page.goto('/login');
+setup('register a disposable account and save authenticated state', async ({
+  page,
+  registerPage,
+}) => {
+  setup.setTimeout(90_000);
 
-  await page.getByLabel('Email:').fill(userData.validUser.email);
+  const user = DataFactory.generateUserData();
 
-  await page.getByLabel('Password:').fill(userData.validUser.password);
+  await registerPage.navigate();
+  await registerPage.registerUser(user);
 
-  await page.getByRole('button', { name: 'Log in' }).click();
+  await expect(page.getByRole('link', { name: user.email })).toBeVisible();
 
-  await expect(page.getByRole('link', { name: 'Log out' })).toBeVisible();
-
+  await mkdir(authDirectory, { recursive: true });
+  await writeFile(credentialsFile, JSON.stringify(user, null, 2), 'utf8');
   await page.context().storageState({ path: authFile });
 });
