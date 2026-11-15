@@ -1,0 +1,19 @@
+[
+  {
+    "runId": "36038338800",
+    "runNumber": 24,
+    "runUrl": "https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/36038338800",
+    "generatedAt": "2026-09-24T18:05:55Z",
+    "branch": "main",
+    "commit": "465eba58d03eabae321f31246b46ee28103c70b0",
+    "counts": {
+      "passed": 86,
+      "failed": 2,
+      "flaky": 6,
+      "skipped": 1
+    },
+    "firstAttemptPassRate": 91.5,
+    "eventualSuccessRate": 97.9,
+    "flakyRate": 6.4
+  }
+]
