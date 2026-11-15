@@ -9,11 +9,12 @@ This file records observable findings from the portfolio-readiness validation. I
 - Date: 15 November 2026
 - Browser: Chromium
 - Execution: 4 CI shards
-- Outcome: 92 passed, 2 failed, 0 flaky, 1 skipped
-- First-attempt pass rate: 97.9% (92 / 94 non-skipped outcomes)
-- Eventual success rate: 97.9% (92 / 94 non-skipped outcomes)
+- Outcome: 88 passed, 2 failed, 0 flaky, 1 skipped across 91 unique business scenarios
+- Setup project: 4 executions (one per shard), excluded from business scenario metrics
+- First-attempt pass rate: 97.8% (88 / 90 non-skipped business scenarios)
+- Eventual success rate: 97.8% (88 / 90 non-skipped business scenarios)
 
-The report counts one authentication setup execution per shard. Therefore, 95 outcomes are not 95 unique business scenarios.
+The aggregate CI report has 95 outcomes when the four setup-project executions are included. The headline metrics exclude those infrastructure runs.
 
 ## Findings
 
