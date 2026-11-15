@@ -61,7 +61,7 @@ test.describe('Checkout Constraints & Calculations', () => {
     await checkoutPage.selectPaymentMethod('Purchase Order');
 
     await checkoutPage.poNumberInput.clear();
-    await checkoutPage.continuePaymentInfo();
+    await checkoutPage.submitPaymentInfoForValidation();
 
     // Verify confirm section is not active and payment info retains focus
     await expect(checkoutPage.confirmOrderSection).not.toHaveClass(/active/);
