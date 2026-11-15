@@ -59,4 +59,4 @@ Playwright creates a new browser context for each test. Guest tests override the
 
 The headline dashboard counts unique business test scenarios by spec identity. The `setup` project is excluded from pass-rate denominators and shown separately. A scenario is classified as passed, failed, flaky or skipped. Retries do not convert a final failure into a pass.
 
-See [KNOWN-ISSUES.md](KNOWN-ISSUES.md) for currently observed behaviour that still fails validation.
+See [KNOWN-ISSUES.md](KNOWN-ISSUES.md) for historical findings, current reproduction status and validation evidence.
