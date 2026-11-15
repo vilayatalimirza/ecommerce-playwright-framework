@@ -1,27 +1,29 @@
 import { test, expect } from '../fixtures/BaseTest';
-import { LoginPage } from '../pages/LoginPage';
-import users from '../data/users.json';
+import { loadAuthUser } from '../utils/auth-user';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe('Authentication Tests', () => {
-  let loginPage: LoginPage;
-
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
+  test('Displays error message when logging in with invalid credentials', async ({
+    loginPage,
+  }) => {
     await loginPage.navigate();
-  });
+    await loginPage.login('not-a-real-user@qa-automation-test.invalid', 'DefinitelyWrong123!');
 
-  test('Displays error message when logging in with invalid credentials', async () => {
-    await loginPage.login(users.invalidUser.email, users.invalidUser.password);
     await expect(loginPage.errorMessage).toBeVisible();
     await expect(loginPage.errorMessage).toContainText('Login was unsuccessful');
   });
 
-  test('User can log in with valid credentials', async ({ page }) => {
-    await loginPage.login(users.validUser.email, users.validUser.password);
-    await expect(page).toHaveURL(/.*demowebshop.*/);
+  test('User can log in with the disposable account created by setup', async ({
+    page,
+    loginPage,
+  }) => {
+    const user = await loadAuthUser();
+
+    await loginPage.navigate();
+    await loginPage.login(user.email, user.password);
+
     await expect(page.getByRole('link', { name: 'Log out' })).toBeVisible();
-    await expect(page.getByRole('link', { name: users.validUser.email })).toBeVisible();
+    await expect(page.getByRole('link', { name: user.email })).toBeVisible();
   });
 });
