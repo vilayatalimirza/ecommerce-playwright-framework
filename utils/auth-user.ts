@@ -1,11 +1,14 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import type { UserData } from './DataFactory';
+type AuthUser = {
+  email: string;
+  password: string;
+};
 
 const AUTH_USER_FILE = path.resolve('playwright/.auth/credentials.json');
 
-export async function loadAuthUser(): Promise<UserData> {
+export async function loadAuthUser(): Promise<AuthUser> {
   const raw = await readFile(AUTH_USER_FILE, 'utf8');
   const parsed: unknown = JSON.parse(raw);
 
@@ -22,5 +25,5 @@ export async function loadAuthUser(): Promise<UserData> {
     );
   }
 
-  return parsed as UserData;
+  return { email: parsed.email, password: parsed.password };
 }
