@@ -217,13 +217,25 @@ export class CustomerAccountPage {
       void dialog.accept();
     });
 
-    // The delete handler navigates to a server endpoint that redirects back
-    // to the address list. Do not make the click wait for that navigation.
+    // Trigger the real confirmation handler, but observe the response rather
+    // than waiting for the full document navigation. The demo endpoint can stall
+    // during its redirect even after the delete request has been processed.
+    const deleteResponsePromise = this.page.waitForResponse(
+      (response) => response.url().includes('/customer/addressdelete/'),
+      { timeout: 30_000 },
+    );
+
     await deleteButton.click({ noWaitAfter: true });
 
-    await expect(this.page).toHaveURL(/customer\/addresses/i, {
-      timeout: 45_000,
+    const deleteResponse = await deleteResponsePromise;
+    expect(deleteResponse.status()).toBeLessThan(400);
+
+    // Reload the list explicitly after the server responds to the delete request.
+    await this.page.goto('/customer/addresses', {
+      waitUntil: 'domcontentloaded',
+      timeout: 30_000,
     });
+
     await expect(this.addressCards).toHaveCount(initialAddressCount - 1, {
       timeout: 30_000,
     });
