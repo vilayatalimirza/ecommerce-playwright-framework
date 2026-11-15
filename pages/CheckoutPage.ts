@@ -33,6 +33,7 @@ export class CheckoutPage {
   readonly paymentMethodContinueButton: Locator;
   readonly paymentInfoContinueButton: Locator;
   readonly confirmOrderButton: Locator;
+  readonly loadingNextStep: Locator;
 
   // Confirmation Elements
   readonly orderSuccessMessage: Locator;
@@ -82,6 +83,7 @@ export class CheckoutPage {
     this.confirmOrderButton = page.locator(
       '#confirm-order-buttons-container input[value="Confirm"], #opc-confirm_order input.confirm-order-next-step-button',
     );
+    this.loadingNextStep = page.getByText('Loading next step...', { exact: true });
 
     // Success State
     this.orderSuccessMessage = page.getByText('Your order has been successfully processed!');
@@ -104,6 +106,10 @@ export class CheckoutPage {
     this.taxText = this.rowValueByLabel('Tax:');
     this.additionalFeeText = this.rowValueByLabel('Additional fee:');
     this.orderTotalText = this.rowValueByLabel('Total:');
+  }
+
+  private async waitForStepTransition(): Promise<void> {
+    await expect(this.loadingNextStep).toBeHidden({ timeout: 45_000 });
   }
 
   private rowValueByLabel(labelText: string): Locator {
@@ -136,16 +142,19 @@ export class CheckoutPage {
     await this.billingSection.getByLabel('Phone number:').fill(address.phoneNumber);
 
     await this.billingContinueButton.click();
+    await this.waitForStepTransition();
   }
 
   async selectSavedBillingAddress(optionLabel: string): Promise<void> {
     await this.billingAddressSelect.selectOption({ label: optionLabel });
     await this.billingContinueButton.click();
+    await this.waitForStepTransition();
   }
 
   async continueShippingAddress(): Promise<void> {
     await expect(this.shippingContinueButton).toBeVisible({ timeout: 15000 });
     await this.shippingContinueButton.click();
+    await this.waitForStepTransition();
   }
 
   async selectShippingMethod(methodName: ShippingMethod): Promise<void> {
@@ -157,6 +166,7 @@ export class CheckoutPage {
         '#shipping-method-buttons-container input[value="Continue"], input.shipping-method-next-step-button',
       )
       .click();
+    await this.waitForStepTransition();
   }
 
   async selectPaymentMethod(methodName: PaymentMethod): Promise<void> {
@@ -164,11 +174,13 @@ export class CheckoutPage {
     await expect(label.first()).toBeVisible({ timeout: 15000 });
     await label.first().click();
     await this.paymentMethodContinueButton.click();
+    await this.waitForStepTransition();
   }
 
   async continuePaymentInfo(): Promise<void> {
     await expect(this.paymentInfoContinueButton).toBeVisible({ timeout: 15000 });
     await this.paymentInfoContinueButton.click();
+    await this.waitForStepTransition();
   }
 
   async confirmOrder(): Promise<void> {
