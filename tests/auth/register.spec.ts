@@ -1,5 +1,5 @@
-import { test, expect } from '../fixtures/BaseTest';
-import { DataFactory } from '../utils/DataFactory';
+import { test, expect } from '../../fixtures/BaseTest';
+import { DataFactory } from '../../utils/DataFactory';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 
-import { test as setup, expect } from '../fixtures/BaseTest';
-import { DataFactory } from '../utils/DataFactory';
+import { test as setup, expect } from '../../fixtures/BaseTest';
+import { DataFactory } from '../../utils/DataFactory';
 
 const authDirectory = 'playwright/.auth';
 const authFile = authDirectory + '/user.json';

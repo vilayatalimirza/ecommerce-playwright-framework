@@ -1,6 +1,6 @@
-import { test, expect } from '../fixtures/BaseTest';
-import { type CustomerAddress } from '../pages/CustomerAccountPage';
-import { DataFactory } from '../utils/DataFactory';
+import { test, expect } from '../../fixtures/BaseTest';
+import { type CustomerAddress } from '../../pages/CustomerAccountPage';
+import { DataFactory } from '../../utils/DataFactory';
 
 test.use({ storageState: 'playwright/.auth/user.json' });
 

@@ -1,6 +1,6 @@
 // tests/gift-cards.spec.ts
-import { test, expect } from '../fixtures/BaseTest';
-import { uniqueEmail } from '../utils/test-data';
+import { test, expect } from '../../fixtures/BaseTest';
+import { uniqueEmail } from '../../utils/test-data';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

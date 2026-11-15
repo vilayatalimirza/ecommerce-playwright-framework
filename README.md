@@ -72,7 +72,14 @@ See the [architecture guide](ARCHITECTURE.md) for the test execution and CI flow
 ├── fixtures/                # typed Playwright page-object fixtures
 ├── pages/                   # page objects for application areas
 ├── scripts/                 # CI issue creation and result aggregation
-├── tests/                   # test specifications
+├── tests/                   # specs organised by business domain
+│   ├── auth/
+│   ├── catalog/
+│   ├── cart/
+│   ├── checkout/
+│   ├── account/
+│   ├── quality/
+│   └── README.md
 ├── utils/                   # generated test data helpers
 ├── metrics/                 # CI metrics history and Shields badge endpoints
 ├── package.json

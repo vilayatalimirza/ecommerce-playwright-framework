@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/BaseTest';
+import { test, expect } from '../../fixtures/BaseTest';
 
 test.describe('Product Catalog Sorting and Display', () => {
   test('sorts products by price from low to high', async ({ page, catalogPage }) => {

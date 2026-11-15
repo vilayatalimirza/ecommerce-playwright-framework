@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/BaseTest';
+import { test, expect } from '../../fixtures/BaseTest';
 
 const PRODUCT_A_URL = '/computing-and-internet';
 const PRODUCT_A_NAME = 'Computing and Internet';

@@ -1,6 +1,6 @@
-import { test, expect } from '../fixtures/BaseTest';
-import { uniqueEmail } from '../utils/test-data';
-import { loadAuthUser } from '../utils/auth-user';
+import { test, expect } from '../../fixtures/BaseTest';
+import { uniqueEmail } from '../../utils/test-data';
+import { loadAuthUser } from '../../utils/auth-user';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

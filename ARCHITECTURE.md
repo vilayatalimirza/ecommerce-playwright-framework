@@ -7,7 +7,7 @@ flowchart TD
     A["Playwright test specs"] --> B["Custom fixtures: fixtures/BaseTest.ts"]
     B --> C["Page objects: pages/"]
     B --> D["Generated data: utils/DataFactory.ts"]
-    B --> E["Generated auth state: tests/auth.setup.ts"]
+    B --> E["Generated auth state: tests/auth/auth.setup.ts"]
     C --> F["Demo Web Shop UI"]
     C --> G["Playwright APIRequestContext"]
     A --> H["Network interception and axe-core"]

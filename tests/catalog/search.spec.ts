@@ -1,5 +1,5 @@
 // tests/search.spec.ts
-import { test, expect } from '../fixtures/BaseTest';
+import { test, expect } from '../../fixtures/BaseTest';
 
 test.describe('Search Engine & Advanced Filtering', () => {
   test('Typing >= 3 characters triggers autocomplete suggestions dropdown @smoke @regression', async ({

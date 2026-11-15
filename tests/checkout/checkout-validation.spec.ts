@@ -1,7 +1,7 @@
 // tests/checkout-validation.spec.ts
-import { test, expect } from '../fixtures/BaseTest';
-import { type BillingAddress } from '../pages/CheckoutPage';
-import { uniqueEmail } from '../utils/test-data';
+import { test, expect } from '../../fixtures/BaseTest';
+import { type BillingAddress } from '../../pages/CheckoutPage';
+import { uniqueEmail } from '../../utils/test-data';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

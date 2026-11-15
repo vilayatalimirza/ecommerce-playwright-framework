@@ -21,7 +21,7 @@ The merged CI report has 95 total outcomes when the four setup-project execution
 
 | Field | Observation |
 |---|---|
-| Test | `tests/account-management.spec.ts` — Customer can delete an address card |
+| Test | `tests/account/account-management.spec.ts` — Customer can delete an address card |
 | Result | Failed after retry |
 | Observed behaviour | The browser accepts the Delete confirmation and issues a request to `/customer/addressdelete/{id}`. The test then returns to `/customer/addresses`, but the address card is still present |
 | Expected behaviour | The selected address should be deleted and the customer address list should contain zero cards |
@@ -34,7 +34,7 @@ The test uses the actual UI confirmation and observes the outgoing request. It d
 
 | Field | Observation |
 |---|---|
-| Test | `tests/configurable-products.spec.ts` — product detail displays volume tier pricing |
+| Test | `tests/catalog/configurable-products.spec.ts` — product detail displays volume tier pricing |
 | Result | Skipped |
 | Reason | The test checks whether the tier-pricing block is configured on `/fiction`; when it is absent, it calls `test.skip` with the reason “Volume tier pricing is not configured on this product in Demo Web Shop” |
 | Classification | Test-data / target configuration limitation, not an automation failure |

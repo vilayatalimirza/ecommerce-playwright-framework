@@ -1,6 +1,6 @@
-import { test, expect } from '../fixtures/BaseTest';
-import { type BillingAddress } from '../pages/CheckoutPage';
-import { DataFactory } from '../utils/DataFactory';
+import { test, expect } from '../../fixtures/BaseTest';
+import { type BillingAddress } from '../../pages/CheckoutPage';
+import { DataFactory } from '../../utils/DataFactory';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

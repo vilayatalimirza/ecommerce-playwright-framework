@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/BaseTest';
+import { test, expect } from '../../fixtures/BaseTest';
 
 test.describe('Network Mocking', () => {
   test('Mocks search autocomplete suggestions', async ({ page }) => {

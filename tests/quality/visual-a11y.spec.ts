@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/BaseTest';
+import { test, expect } from '../../fixtures/BaseTest';
 import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Visual Regression & Accessibility Audits', () => {

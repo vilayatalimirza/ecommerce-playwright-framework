@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/BaseTest';
+import { test, expect } from '../../fixtures/BaseTest';
 
 const searchTerms = ['Laptop', 'Computer', 'Phone'];
 

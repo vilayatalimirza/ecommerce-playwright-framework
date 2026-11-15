@@ -1,6 +1,6 @@
 // tests/global-utilities.spec.ts
-import { test, expect } from '../fixtures/BaseTest';
-import { DataFactory, uniqueEmail } from '../utils/DataFactory';
+import { test, expect } from '../../fixtures/BaseTest';
+import { DataFactory, uniqueEmail } from '../../utils/DataFactory';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
