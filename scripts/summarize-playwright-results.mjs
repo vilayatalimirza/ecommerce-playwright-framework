@@ -17,10 +17,6 @@ const runUrl = runId === 'local' ? null : serverUrl + '/' + repository + '/actio
 
 const emptyCounts = () => ({ passed: 0, failed: 0, flaky: 0, skipped: 0 });
 
-function addCounts(target, source) {
-  for (const key of Object.keys(target)) target[key] += Number(source[key] ?? 0);
-}
-
 function percentage(numerator, denominator) {
   return denominator === 0 ? null : Number(((numerator / denominator) * 100).toFixed(1));
 }
@@ -185,6 +181,8 @@ async function main() {
     branch,
     commit: commitSha,
     counts,
+    totalScenarios,
+    setupProjectExecutions,
     firstAttemptPassRate,
     eventualSuccessRate,
     flakyRate,
