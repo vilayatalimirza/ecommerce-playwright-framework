@@ -4,7 +4,7 @@ This file records observable findings from the portfolio-readiness validation. I
 
 ## Validation run
 
-- GitHub Actions run: [#29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43759189266)
+- GitHub Actions run: [#29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43761210473)
 - Pull request: [#7](https://github.com/vilayatalimirza/ecommerce-playwright-framework/pull/7)
 - Date: 15 November 2026
 - Browser: Chromium
@@ -25,7 +25,7 @@ The report counts one authentication setup execution per shard. Therefore, 95 ou
 | Result | Failed after retry |
 | Observed behaviour | The browser follows the Delete confirmation handler to `/customer/addressdelete/{id}`, but the navigation does not complete or return to `/customer/addresses` within 45 seconds |
 | Classification | Shared demo application / endpoint availability issue is suspected; root cause is not confirmed |
-| Evidence | [Run #29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43759189266) |
+| Evidence | [Run #29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43761210473) |
 
 The test uses the actual browser confirmation path. It does not bypass the UI with a direct HTTP request. The failure remains visible because the application never completes the resulting navigation in the observed run.
 
@@ -38,7 +38,7 @@ The test uses the actual browser confirmation path. It does not bypass the UI wi
 | Observed behaviour | After clearing the Purchase Order number and continuing, the `Confirm order` accordion becomes active and its Confirm button is present |
 | Expected behaviour | The empty PO number should be rejected before the order can reach confirmation |
 | Classification | Potential target-application validation defect; reproduce manually before treating it as a confirmed product bug |
-| Evidence | [Run #29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43759189266) |
+| Evidence | [Run #29](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43761210473) |
 
 The assertion is intentionally retained. Weakening it would hide the behaviour the test was written to detect.
 
