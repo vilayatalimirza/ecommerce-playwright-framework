@@ -1,11 +1,8 @@
 import { test, expect } from '../fixtures/BaseTest';
-import users from '../data/users.json';
 import { uniqueEmail } from '../utils/test-data';
+import { loadAuthUser } from '../utils/auth-user';
 
-/**
- * Runs unauthenticated to isolate login and recovery forms from the
- * default storageState session.
- */
+/** Runs unauthenticated to isolate login and recovery forms. */
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe('Authentication & Password Recovery Validation', () => {
@@ -22,9 +19,8 @@ test.describe('Authentication & Password Recovery Validation', () => {
   test('Logging in with non-existent credentials displays error banner @regression', async ({
     loginPage,
   }) => {
-    const nonexistentEmail = uniqueEmail('ghost');
     await loginPage.navigate();
-    await loginPage.login(nonexistentEmail, 'Password123!');
+    await loginPage.login(uniqueEmail('ghost'), 'Password123!');
 
     await expect(loginPage.errorMessage).toBeVisible();
     await expect(loginPage.errorMessage).toContainText(
@@ -55,19 +51,17 @@ test.describe('Authentication & Password Recovery Validation', () => {
     await expect(loginPage.rememberMeCheckbox).not.toBeChecked();
   });
 
-  /**
-   * NEEDS SPOT-CHECK: The exact success notification text on password recovery
-   * is assumed to follow standard nopCommerce wording ("Email with instructions has been sent to you.").
-   */
   test('Password recovery with registered email submits successfully @sanity @regression', async ({
     page,
     loginPage,
   }) => {
+    const user = await loadAuthUser();
+
     await loginPage.navigate();
     await loginPage.forgotPasswordLink.click();
 
     await expect(page).toHaveURL(/.*passwordrecovery/);
-    await page.getByLabel(/email/i).fill(users.validUser.email);
+    await page.getByLabel(/email/i).fill(user.email);
     await page.getByRole('button', { name: 'Recover' }).click();
 
     const resultMessage = page.locator('.result, .message-error');
@@ -75,10 +69,6 @@ test.describe('Authentication & Password Recovery Validation', () => {
     await expect(resultMessage).toContainText(/instructions has been sent|sent/i);
   });
 
-  /**
-   * NEEDS SPOT-CHECK: nopCommerce can be configured to show "Email not found"
-   * or a generic success notice to prevent user enumeration.
-   */
   test('Password recovery with unregistered email displays error or notice @regression', async ({
     page,
     loginPage,
@@ -86,8 +76,7 @@ test.describe('Authentication & Password Recovery Validation', () => {
     await loginPage.navigate();
     await loginPage.forgotPasswordLink.click();
 
-    const unregisteredEmail = uniqueEmail('unregistered');
-    await page.getByLabel(/email/i).fill(unregisteredEmail);
+    await page.getByLabel(/email/i).fill(uniqueEmail('unregistered'));
     await page.getByRole('button', { name: 'Recover' }).click();
 
     const outcomeNotice = page.locator('.result, .message-error');
