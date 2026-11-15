@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-24T18:05:55Z",
+  "source": "Playwright CI shard logs for workflow run #24; archived JSON report artifacts are no longer available",
+  "historicalBaseline": true,
+  "run": {
+    "id": "36038338800",
+    "number": 24,
+    "url": "https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/36038338800",
+    "branch": "main",
+    "commit": "465eba58d03eabae321f31246b46ee28103c70b0"
+  },
+  "shardCount": 4,
+  "totalTestOutcomes": 95,
+  "counts": {
+    "passed": 86,
+    "failed": 2,
+    "flaky": 6,
+    "skipped": 1
+  },
+  "rates": {
+    "firstAttemptPassRate": 91.5,
+    "eventualSuccessRate": 97.9,
+    "flakyRate": 6.4,
+    "finalFailureRate": 2.1,
+    "denominator": 94,
+    "skippedExcluded": true
+  },
+  "failures": [
+    {
+      "title": "Customer can delete an address card and confirm removal from the DOM",
+      "file": "tests/account-management.spec.ts",
+      "line": 51,
+      "status": "failed",
+      "retries": 1,
+      "error": "The API request used to delete the address timed out after 60 seconds."
+    },
+    {
+      "title": "Newly placed order renders in customer order history with valid date, total, and Details link",
+      "file": "tests/order-management.spec.ts",
+      "line": 38,
+      "status": "failed",
+      "retries": 1,
+      "error": "The Shipping Continue button did not become visible during checkout."
+    }
+  ],
+  "flakyTests": [
+    {
+      "title": "In-Store Pickup bypasses shipping address and method steps",
+      "file": "tests/checkout-order.spec.ts",
+      "line": 75,
+      "status": "flaky",
+      "retries": 1
+    },
+    {
+      "title": "Digital download checkout bypasses shipping panels completely",
+      "file": "tests/checkout-order.spec.ts",
+      "line": 108,
+      "status": "flaky",
+      "retries": 1
+    },
+    {
+      "title": "Payment method Purchase Order blocks submission when PO number is empty",
+      "file": "tests/checkout-validation.spec.ts",
+      "line": 44,
+      "status": "flaky",
+      "retries": 1
+    },
+    {
+      "title": "Payment method Credit Card blocks progression on missing card inputs",
+      "file": "tests/checkout-validation.spec.ts",
+      "line": 71,
+      "status": "flaky",
+      "retries": 1
+    },
+    {
+      "title": "Order details page lists accurate line items and product option specifications",
+      "file": "tests/order-management.spec.ts",
+      "line": 63,
+      "status": "flaky",
+      "retries": 1
+    },
+    {
+      "title": "PDF Invoice button triggers browser download event with a .pdf file",
+      "file": "tests/order-management.spec.ts",
+      "line": 77,
+      "status": "flaky",
+      "retries": 1
+    }
+  ],
+  "shards": [
+    {
+      "shard": "1",
+      "passed": 23,
+      "failed": 1,
+      "flaky": 2,
+      "skipped": 0
+    },
+    {
+      "shard": "2",
+      "passed": 20,
+      "failed": 0,
+      "flaky": 2,
+      "skipped": 1
+    },
+    {
+      "shard": "3",
+      "passed": 24,
+      "failed": 1,
+      "flaky": 2,
+      "skipped": 0
+    },
+    {
+      "shard": "4",
+      "passed": 19,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0
+    }
+  ],
+  "note": "Total outcomes include one authentication setup execution in every shard. These are historical outcomes from run #24, not a run performed by this refactor."
+}
