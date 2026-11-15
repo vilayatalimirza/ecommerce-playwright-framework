@@ -1,6 +1,8 @@
 import { test, expect } from '../fixtures/BaseTest';
 import { DataFactory } from '../utils/DataFactory';
 
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Customer Registration Flow', () => {
   test('registers a new customer using custom POM fixtures', async ({ registerPage, page }) => {
     const newUser = DataFactory.generateUserData();
