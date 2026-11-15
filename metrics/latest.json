@@ -1,129 +1,97 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-09-24T18:05:55Z",
-  "source": "Historical Playwright CI shard logs for workflow run #24; original archived JSON report artifacts are no longer available",
-  "historicalBaseline": true,
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-15T22:27:03.234Z",
+  "source": "Playwright JSON reporter; functional tests separated from setup project",
   "run": {
-    "id": "36038338800",
-    "number": 24,
-    "url": "https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/36038338800",
+    "id": "43768877899",
+    "number": 61,
+    "url": "https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43768877899",
     "branch": "main",
-    "commit": "465eba58d03eabae321f31246b46ee28103c70b0"
+    "event": "push",
+    "commit": "ea71a71e3214e2cf9814c63586fb3dcbea198dfe"
   },
   "shardCount": 4,
-  "totalScenarios": 91,
-  "totalTestOutcomes": 91,
-  "setupProjectExecutions": 4,
+  "totalFunctionalOutcomes": 91,
+  "totalSetupExecutions": 4,
   "totalOutcomesIncludingSetup": 95,
   "counts": {
-    "passed": 82,
-    "failed": 2,
-    "flaky": 6,
+    "passed": 89,
+    "failed": 1,
+    "flaky": 0,
     "skipped": 1
   },
+  "setup": {
+    "passed": 4,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0
+  },
   "rates": {
-    "firstAttemptPassRate": 91.1,
-    "eventualSuccessRate": 97.8,
-    "flakyRate": 6.7,
-    "finalFailureRate": 2.2,
+    "firstAttemptPassRate": 98.9,
+    "eventualSuccessRate": 98.9,
+    "flakyRate": 0,
+    "finalFailureRate": 1.1,
     "denominator": 90,
-    "skippedExcluded": true
+    "skippedExcluded": true,
+    "setupProjectExcluded": true
   },
   "failures": [
     {
-      "title": "Customer can delete an address card and confirm removal from the DOM",
-      "file": "tests/account-management.spec.ts",
+      "title": "Customer can delete an address card and confirm removal from the DOM @regression",
+      "file": "account/account-management.spec.ts",
       "line": 51,
-      "status": "failed",
+      "project": "chromium",
+      "status": "unexpected",
       "retries": 1,
-      "error": "The address deletion HTTP request timed out after 60 seconds."
-    },
-    {
-      "title": "Newly placed order renders in customer order history with valid date, total, and Details link",
-      "file": "tests/order-management.spec.ts",
-      "line": 38,
-      "status": "failed",
-      "retries": 1,
-      "error": "The Shipping Continue button did not become visible during checkout."
+      "durationMs": 56500,
+      "error": "Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveCount[2m([22m[32mexpected[39m[2m)[22m failed\n\nLocator:  locator('.address-list .address-item, .address-item')\nExpected: [32m0[39m\nReceived: [31m1[39m\nTimeout:  30000ms\n\nCall log:\n[2m  - Expect \"toHaveCount\" locator('.address-list .address-item, .address-item') with timeout 30000ms[22m\n[2m  - waiting for locator('.address-list .address-item, .address-item')[22m\n[2m    64 × locator resolved to 1 element[22m\n[2m       - unexpected value \"1\"[22m\n\n\n   at ../pages/CustomerAccountPage.ts:237\n\n  235 |     });\n  236 |\n> 237 |     await expect(this.addressCards).toHaveCount(initialAddressCount - 1, {\n      |                                     ^\n  238 |       timeout: 30_000,\n  239 |     });\n  240 |   }\n    at CustomerAccountPage.deleteAddress (/home/runner/work/ecommerce-playwright-framework/ecommerce-playwright-framework/pages/CustomerAccountPage.ts:237:37)\n    at /home/runner/work/ecommerce-playwright-framework/ecommerce-playwright-framework/tests/account/account-management.spec.ts:63:5"
     }
   ],
-  "flakyTests": [
-    {
-      "title": "In-Store Pickup bypasses shipping address and method steps",
-      "file": "tests/checkout-order.spec.ts",
-      "line": 75,
-      "status": "flaky",
-      "retries": 1
-    },
-    {
-      "title": "Digital download checkout bypasses shipping panels completely",
-      "file": "tests/checkout-order.spec.ts",
-      "line": 108,
-      "status": "flaky",
-      "retries": 1
-    },
-    {
-      "title": "Payment method Purchase Order blocks submission when PO number is empty",
-      "file": "tests/checkout-validation.spec.ts",
-      "line": 44,
-      "status": "flaky",
-      "retries": 1
-    },
-    {
-      "title": "Payment method Credit Card blocks progression on missing card inputs",
-      "file": "tests/checkout-validation.spec.ts",
-      "line": 71,
-      "status": "flaky",
-      "retries": 1
-    },
-    {
-      "title": "Order details page lists accurate line items and product option specifications",
-      "file": "tests/order-management.spec.ts",
-      "line": 63,
-      "status": "flaky",
-      "retries": 1
-    },
-    {
-      "title": "PDF Invoice button triggers browser download event with a .pdf file",
-      "file": "tests/order-management.spec.ts",
-      "line": 77,
-      "status": "flaky",
-      "retries": 1
-    }
-  ],
+  "flakyTests": [],
   "shards": [
     {
       "shard": "1",
-      "passed": 22,
+      "passed": 27,
       "failed": 1,
-      "flaky": 2,
+      "flaky": 0,
       "skipped": 0,
-      "setupExecutions": 1
+      "setupPassed": 1,
+      "setupFailed": 0,
+      "setupSkipped": 0,
+      "totalOutcomes": 29
     },
     {
       "shard": "2",
-      "passed": 19,
-      "failed": 0,
-      "flaky": 2,
-      "skipped": 1,
-      "setupExecutions": 1
-    },
-    {
-      "shard": "3",
-      "passed": 23,
-      "failed": 1,
-      "flaky": 2,
-      "skipped": 0,
-      "setupExecutions": 1
-    },
-    {
-      "shard": "4",
-      "passed": 18,
+      "passed": 20,
       "failed": 0,
       "flaky": 0,
       "skipped": 0,
-      "setupExecutions": 1
+      "setupPassed": 1,
+      "setupFailed": 0,
+      "setupSkipped": 0,
+      "totalOutcomes": 21
+    },
+    {
+      "shard": "3",
+      "passed": 25,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 1,
+      "setupPassed": 1,
+      "setupFailed": 0,
+      "setupSkipped": 0,
+      "totalOutcomes": 27
+    },
+    {
+      "shard": "4",
+      "passed": 17,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "setupPassed": 1,
+      "setupFailed": 0,
+      "setupSkipped": 0,
+      "totalOutcomes": 18
     }
-  ],
-  "note": "Business metrics exclude one authentication setup execution per shard. This historical main-branch baseline predates the portfolio-readiness refactor."
+  ]
 }
