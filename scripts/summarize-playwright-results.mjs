@@ -265,7 +265,7 @@ async function main() {
     '|---|---|---:|---|',
     ...flakyRows,
     '',
-    '> Business scenario metrics deduplicate by spec identity and exclude setup-project executions. Skipped scenarios are excluded from pass-rate denominators. Setup executions are displayed separately.'
+    '> Business scenario metrics deduplicate by spec identity and exclude setup-project executions. Skipped scenarios are excluded from pass-rate denominators. Setup executions are displayed separately.',
     '',
   ];
 
