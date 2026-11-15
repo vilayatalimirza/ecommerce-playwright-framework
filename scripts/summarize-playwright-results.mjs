@@ -227,6 +227,7 @@ async function main() {
     'final-success.json': makeBadge('eventual success', eventualSuccessRate === null ? 'n/a' : eventualSuccessRate + '%', successColor),
     'failed.json': makeBadge('failed after retries', String(functionalCounts.failed), functionalCounts.failed === 0 ? 'brightgreen' : 'red'),
     'flaky.json': makeBadge('flaky', String(functionalCounts.flaky), functionalCounts.flaky === 0 ? 'brightgreen' : 'yellow'),
+    'total-scenarios.json': makeBadge('business scenarios', String(functionalOutcomes), 'blue'),
   };
 
   for (const [file, data] of Object.entries(badges)) {
