@@ -55,6 +55,8 @@ The configured CI browser project is **Chromium**. Other browser engines are not
 
 ## Framework design
 
+See the [architecture guide](ARCHITECTURE.md) for the test execution and CI flow diagrams.
+
 - **Page Object Model:** page classes keep selectors and user interactions out of test specifications.
 - **Custom fixtures:** `fixtures/BaseTest.ts` constructs page objects on demand through Playwright's fixture system.
 - **Generated test data:** Faker supplies test data; UUID-based email addresses reduce collisions between parallel tests.
