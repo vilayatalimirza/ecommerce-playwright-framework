@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedAt": "2026-09-24T18:05:55Z",
-  "source": "Playwright CI shard logs for workflow run #24; archived JSON report artifacts are no longer available",
+  "source": "Historical Playwright CI shard logs for workflow run #24; original archived JSON report artifacts are no longer available",
   "historicalBaseline": true,
   "run": {
     "id": "36038338800",
@@ -11,19 +11,22 @@
     "commit": "465eba58d03eabae321f31246b46ee28103c70b0"
   },
   "shardCount": 4,
-  "totalTestOutcomes": 95,
+  "totalScenarios": 91,
+  "totalTestOutcomes": 91,
+  "setupProjectExecutions": 4,
+  "totalOutcomesIncludingSetup": 95,
   "counts": {
-    "passed": 86,
+    "passed": 82,
     "failed": 2,
     "flaky": 6,
     "skipped": 1
   },
   "rates": {
-    "firstAttemptPassRate": 91.5,
-    "eventualSuccessRate": 97.9,
-    "flakyRate": 6.4,
-    "finalFailureRate": 2.1,
-    "denominator": 94,
+    "firstAttemptPassRate": 91.1,
+    "eventualSuccessRate": 97.8,
+    "flakyRate": 6.7,
+    "finalFailureRate": 2.2,
+    "denominator": 90,
     "skippedExcluded": true
   },
   "failures": [
@@ -33,7 +36,7 @@
       "line": 51,
       "status": "failed",
       "retries": 1,
-      "error": "The API request used to delete the address timed out after 60 seconds."
+      "error": "The address deletion HTTP request timed out after 60 seconds."
     },
     {
       "title": "Newly placed order renders in customer order history with valid date, total, and Details link",
@@ -91,32 +94,36 @@
   "shards": [
     {
       "shard": "1",
-      "passed": 23,
+      "passed": 22,
       "failed": 1,
       "flaky": 2,
-      "skipped": 0
+      "skipped": 0,
+      "setupExecutions": 1
     },
     {
       "shard": "2",
-      "passed": 20,
+      "passed": 19,
       "failed": 0,
       "flaky": 2,
-      "skipped": 1
+      "skipped": 1,
+      "setupExecutions": 1
     },
     {
       "shard": "3",
-      "passed": 24,
+      "passed": 23,
       "failed": 1,
       "flaky": 2,
-      "skipped": 0
+      "skipped": 0,
+      "setupExecutions": 1
     },
     {
       "shard": "4",
-      "passed": 19,
+      "passed": 18,
       "failed": 0,
       "flaky": 0,
-      "skipped": 0
+      "skipped": 0,
+      "setupExecutions": 1
     }
   ],
-  "note": "Total outcomes include one authentication setup execution in every shard. These are historical outcomes from run #24, not a run performed by this refactor."
+  "note": "Business metrics exclude one authentication setup execution per shard. This historical main-branch baseline predates the portfolio-readiness refactor."
 }
