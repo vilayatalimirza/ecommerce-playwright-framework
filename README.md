@@ -51,9 +51,22 @@ All four Chromium shards and the code-quality/type-check job completed successfu
 
 The recurring weak point is address deletion in the shared demo application. It failed finally in run #57 and failed on the first attempt in run #58 before passing on retry. The Purchase Order validation failure observed in runs #29 and #30 has not recurred in runs #55, #57 or #58. Details and current reproduction status are recorded in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 
-### Main-branch badges
+### Latest main-branch run
 
-Until this pull request is merged and a new main-branch workflow runs, the badges at the top of this README continue to reflect the older [main-branch run #24](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/36038338800), executed on 24 September 2026. The run #55 metrics are available in its workflow job summary and downloadable `playwright-metrics` artifact; the main-branch badge endpoints will update from the next successful main-branch metrics publication.
+The latest completed main-branch workflow is [run 43768877899, completed on 15 November 2026](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43768877899). **The overall workflow failed**, although code quality/type checks and three of the four Chromium shards passed.
+
+| Functional outcome | Count |
+|---|---:|
+| Passed on first attempt | 89 |
+| Failed after retries | 1 |
+| Flaky (passed on retry) | 0 |
+| Skipped | 1 |
+| Authentication setup executions passed (reported separately) | 4 |
+| **Functional outcomes including the skipped case** | **91** |
+
+The first-attempt and eventual-success rates are both **98.9%** (89 of 90 executed functional tests). The final failure rate is 1.1%; the skipped test is excluded from the rate denominator. The failed case is the address-deletion scenario: after the delete action and retry, the address card remained in the DOM when the test expected it to be removed. The workflow published metrics despite the failed test shard, so the badges above reflect this latest main-branch run: 98.9% first-attempt pass, 98.9% eventual success, one final failure and zero flaky tests.
+
+This is separate from [draft-PR validation run #58](https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43767353876), which passed with one flaky test. A successful PR validation does not override the later failed main-branch result.
 
 ## Coverage
 
