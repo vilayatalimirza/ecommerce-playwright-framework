@@ -1,14 +1,14 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-15T22:27:03.234Z",
+  "generatedAt": "2026-11-18T20:56:02.508Z",
   "source": "Playwright JSON reporter; functional tests separated from setup project",
   "run": {
-    "id": "43768877899",
-    "number": 61,
-    "url": "https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/43768877899",
+    "id": "44395124618",
+    "number": 63,
+    "url": "https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/44395124618",
     "branch": "main",
     "event": "push",
-    "commit": "ea71a71e3214e2cf9814c63586fb3dcbea198dfe"
+    "commit": "3300a521be69dbc0ab205c6b8ed56e2b7db6a5ab"
   },
   "shardCount": 4,
   "totalFunctionalOutcomes": 91,
@@ -16,8 +16,8 @@
   "totalOutcomesIncludingSetup": 95,
   "counts": {
     "passed": 89,
-    "failed": 1,
-    "flaky": 0,
+    "failed": 0,
+    "flaky": 1,
     "skipped": 1
   },
   "setup": {
@@ -28,32 +28,32 @@
   },
   "rates": {
     "firstAttemptPassRate": 98.9,
-    "eventualSuccessRate": 98.9,
-    "flakyRate": 0,
-    "finalFailureRate": 1.1,
+    "eventualSuccessRate": 100,
+    "flakyRate": 1.1,
+    "finalFailureRate": 0,
     "denominator": 90,
     "skippedExcluded": true,
     "setupProjectExcluded": true
   },
-  "failures": [
+  "failures": [],
+  "flakyTests": [
     {
       "title": "Customer can delete an address card and confirm removal from the DOM @regression",
       "file": "account/account-management.spec.ts",
       "line": 51,
       "project": "chromium",
-      "status": "unexpected",
+      "status": "flaky",
       "retries": 1,
-      "durationMs": 56500,
+      "durationMs": 24589,
       "error": "Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveCount[2m([22m[32mexpected[39m[2m)[22m failed\n\nLocator:  locator('.address-list .address-item, .address-item')\nExpected: [32m0[39m\nReceived: [31m1[39m\nTimeout:  30000ms\n\nCall log:\n[2m  - Expect \"toHaveCount\" locator('.address-list .address-item, .address-item') with timeout 30000ms[22m\n[2m  - waiting for locator('.address-list .address-item, .address-item')[22m\n[2m    64 × locator resolved to 1 element[22m\n[2m       - unexpected value \"1\"[22m\n\n\n   at ../pages/CustomerAccountPage.ts:237\n\n  235 |     });\n  236 |\n> 237 |     await expect(this.addressCards).toHaveCount(initialAddressCount - 1, {\n      |                                     ^\n  238 |       timeout: 30_000,\n  239 |     });\n  240 |   }\n    at CustomerAccountPage.deleteAddress (/home/runner/work/ecommerce-playwright-framework/ecommerce-playwright-framework/pages/CustomerAccountPage.ts:237:37)\n    at /home/runner/work/ecommerce-playwright-framework/ecommerce-playwright-framework/tests/account/account-management.spec.ts:63:5"
     }
   ],
-  "flakyTests": [],
   "shards": [
     {
       "shard": "1",
       "passed": 27,
-      "failed": 1,
-      "flaky": 0,
+      "failed": 0,
+      "flaky": 1,
       "skipped": 0,
       "setupPassed": 1,
       "setupFailed": 0,

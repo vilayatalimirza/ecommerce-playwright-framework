@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
   "label": "failed after retries",
-  "message": "1",
-  "color": "red"
+  "message": "0",
+  "color": "brightgreen"
 }

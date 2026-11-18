@@ -41,5 +41,29 @@
     "firstAttemptPassRate": 98.9,
     "eventualSuccessRate": 98.9,
     "flakyRate": 0
+  },
+  {
+    "runId": "44395124618",
+    "runNumber": 63,
+    "runUrl": "https://github.com/vilayatalimirza/ecommerce-playwright-framework/actions/runs/44395124618",
+    "generatedAt": "2026-11-18T20:56:02.508Z",
+    "branch": "main",
+    "event": "push",
+    "commit": "3300a521be69dbc0ab205c6b8ed56e2b7db6a5ab",
+    "counts": {
+      "passed": 89,
+      "failed": 0,
+      "flaky": 1,
+      "skipped": 1
+    },
+    "setup": {
+      "passed": 4,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0
+    },
+    "firstAttemptPassRate": 98.9,
+    "eventualSuccessRate": 100,
+    "flakyRate": 1.1
   }
 ]
