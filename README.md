@@ -75,6 +75,22 @@ See the [architecture guide](ARCHITECTURE.md) for the test execution and CI flow
 - **API and network testing:** selected flows use Playwright's API request context and route interception alongside browser testing.
 - **CI distribution:** GitHub Actions runs four Chromium shards, merges Blob reports and produces an aggregated status summary.
 
+## Architecture at a glance
+
+```mermaid
+flowchart LR
+  CI["GitHub Actions<br/>lint + type-check"] --> SHARDS["Four Chromium shards"]
+  SHARDS --> SPECS["Playwright test specs"]
+  SPECS --> FIXTURES["Typed fixtures"]
+  FIXTURES --> PAGES["Page objects"]
+  FIXTURES --> API["API request context<br/>and route interception"]
+  PAGES --> SHOP["Tricentis Demo Web Shop"]
+  API --> SHOP
+  SHARDS --> REPORTS["Per-shard JSON + Blob reports"]
+  REPORTS --> MERGE["Merge reports + calculate metrics"]
+  MERGE --> OUTPUT["HTML report · job summary · metrics badges"]
+```
+
 ## Project structure
 
 ```text
